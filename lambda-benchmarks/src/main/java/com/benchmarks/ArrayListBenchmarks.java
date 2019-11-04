@@ -1,19 +1,261 @@
 package com.benchmarks;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Function;
 
 import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Setup;
 
 public class ArrayListBenchmarks {
     public class IntegerBenchmarks {
+        public class Reduce {
+            @Param({ "10", "100", "1000", "10000" })
+            public int N;
+            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+
+            @Setup
+            public void setupData() {
+                for (int i = 1; i <= N; i++) {
+                    data.add(i);
+                }
+            }
+
+            @Benchmark
+            public int loopReduce() {
+                int total = 0;
+                for (int i = 0; i < data.size(); i++) {
+                    total += data.get(i);
+                }
+
+                return total;
+            }
+
+            @Benchmark
+            public int iteratorReduce() {
+                int total = 0;
+                for (var value : data) {
+                    total += value;
+                }
+
+                return total;
+            }
+        }
+
+        public class Populate {
+            @Param({ "10", "100", "1000", "10000" })
+            public int N;
+            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+
+            @Setup
+            public void setupData() {
+                for (int i = 1; i <= N; i++) {
+                    data.add(i);
+                }
+            }
+
+            @Benchmark
+            public ArrayList<Integer> loopPopulate() {
+                var result = new ArrayList<Integer>(data.size());
+                var rnd = new Random();
+
+                for (int i = 0; i < data.size(); i++) {
+                    result.add(rnd.nextInt(101));
+                }
+
+                return result;
+            }
+
+            @Benchmark
+            public ArrayList<Integer> iteratorPopulate() {
+                var result = new ArrayList<Integer>(data.size());
+                var rnd = new Random();
+
+                for (var value : data) {
+                    result.add(rnd.nextInt(101));
+                }
+
+                return result;
+            }
+        }
+
+        public class Iterate {
+            @Param({ "10", "100", "1000", "10000" })
+            public int N;
+            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+
+            @Setup
+            public void setupData() {
+                for (int i = 1; i <= N; i++) {
+                    data.add(i);
+                }
+            }
+
+            @Benchmark
+            public int loopIterate() {
+                int count = 0;
+                for (int i = 0; i < data.size(); i++) {
+                    if (data.get(i) > 0)
+                        count++;
+                }
+
+                return count;
+            }
+
+            @Benchmark
+            public int iteratorIterate() {
+                int count = 0;
+                for (var value : data) {
+                    if (value > 0)
+                        ++count;
+                }
+
+                return count;
+            }
+        }
+    
+        public class Contains {
+            @Param({ "10", "100", "1000", "10000" })
+            public int N;
+            public int target;
+            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+
+            @Setup
+            public void setupData() {
+                var max = 101;
+                var min = 1;
+                var rnd = new Random();
+
+                target = rnd.nextInt(max - min) - min;
+
+                for (int i = 1; i <= N; i++) {
+                    data.add(rnd.nextInt(max - min) - min);
+                }
+            }
+
+            @Benchmark
+            public int loopContains() {
+                for (int i = 0; i < data.size(); i++) {
+                    if(data.get(i) == target) return data.get(i);
+                }
+
+                return -1;
+            }
+
+            @Benchmark
+            public int iteratorContains() {
+                for (var value : data) {
+                    if(value == target) return value;
+                }
+
+                return -1;
+            }
+        }
+    
+        public class Filter {
+            @Param({ "10", "100", "1000", "10000" })
+            public int N;
+            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+
+            @Setup
+            public void setupData() {
+                var rnd = new Random();
+                int max = N;
+                int min = -N;
+
+                for (int i = 1; i <= N; i++) {
+                    data.add(rnd.nextInt(max - min) - min);
+                }
+            }
+
+            @Benchmark
+            public ArrayList<Integer> loopFilter() {
+                var result = new ArrayList<Integer>();
+                for (int i = 0; i < data.size(); i++) {
+                    if(data.get(i) >= 0) result.add(data.get(i));
+                }
+
+                return result;
+            }
+
+            @Benchmark
+            public ArrayList<Integer> iteratorFilter() {
+                var result = new ArrayList<Integer>();
+                for (var value : data) {
+                    if(value >= 0) result.add(value);
+                }
+
+                return result;
+            }
+        }
+    
+        public class Copy {
+            @Param({ "10", "100", "1000", "10000" })
+            public int N;
+            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+
+            @Setup
+            public void setupData() {
+                for (int i = 1; i <= N; i++) {
+                    data.add(i);
+                }
+            }
+
+            @Benchmark
+            public ArrayList<Integer> loopCopy() {
+                var result = new ArrayList<Integer>(data.size());
+                for (int i = 0; i < data.size(); i++) {
+                    result.add(data.get(i));
+                }
+
+                return result;
+            }
+
+            @Benchmark
+            public ArrayList<Integer> iteratorCopy() {
+                var result = new ArrayList<Integer>(data.size());
+                for (var value : data) {
+                    result.add(value);
+                }
+
+                return result;
+            }
+        }
+    
+        public class Map {
+            @Param({ "10", "100", "1000", "10000" })
+            public int N;
+            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+
+            @Setup
+            public void setupData() {
+                for (int i = 1; i <= N; i++) {
+                    data.add(i);
+                }
+            }
+
+            @Benchmark
+            public ArrayList<Integer> loopMap() {
+                var result = new ArrayList<Integer>(data.size());
+                for (int i = 0; i < data.size(); i++) {
+                    result.add(data.get(i) * data.get(i));
+                }
+
+                return result;
+            }
+
+            @Benchmark 
+            public ArrayList<Integer> iteratorMap() {
+                var result = new ArrayList<Integer>(data.size());
+                for (var value : data) {
+                    result.add(value * value);
+                }
+
+                return result;
+            }
+        }
     }
 
     public class LongBenchmarks {
@@ -666,7 +908,7 @@ public class ArrayListBenchmarks {
                 for (int i = 0; i < students.size(); i++) {
                     var s = students.get(i);
                     var value = String.format("%s, %s", s.lastName, s.firstName);
-                    
+
                     result.put(s.ID, value);
                 }
 
