@@ -2,6 +2,7 @@ package com.benchmarks;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -9,12 +10,12 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Setup;
 
-public class ArrayListBenchmarks {
+public class LinkedListBenchmarks {
     public class IntegerBenchmarks {
         public class Reduce {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+            public LinkedList<Integer> data = new LinkedList<Integer>();
 
             @Setup
             public void setupData() {
@@ -26,8 +27,10 @@ public class ArrayListBenchmarks {
             @Benchmark
             public int loopReduce() {
                 int total = 0;
-                for (int i = 0; i < data.size(); i++) {
-                    total += data.get(i);
+                var iter = data.iterator();
+
+                while (iter.hasNext()) {
+                    total += iter.next();
                 }
 
                 return total;
@@ -47,7 +50,7 @@ public class ArrayListBenchmarks {
         public class Populate {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+            public LinkedList<Integer> data = new LinkedList<Integer>();
 
             @Setup
             public void setupData() {
@@ -57,8 +60,8 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public ArrayList<Integer> loopPopulate() {
-                var result = new ArrayList<Integer>(data.size());
+            public LinkedList<Integer> loopPopulate() {
+                var result = new LinkedList<Integer>();
                 var rnd = new Random();
 
                 for (int i = 0; i < data.size(); i++) {
@@ -69,8 +72,8 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public ArrayList<Integer> iteratorPopulate() {
-                var result = new ArrayList<Integer>(data.size());
+            public LinkedList<Integer> iteratorPopulate() {
+                var result = new LinkedList<Integer>();
                 var rnd = new Random();
 
                 for (var value : data) {
@@ -84,7 +87,7 @@ public class ArrayListBenchmarks {
         public class Iterate {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+            public LinkedList<Integer> data = new LinkedList<Integer>();
 
             @Setup
             public void setupData() {
@@ -96,8 +99,10 @@ public class ArrayListBenchmarks {
             @Benchmark
             public int loopIterate() {
                 int count = 0;
-                for (int i = 0; i < data.size(); i++) {
-                    if (data.get(i) > 0)
+                var iter = data.iterator();
+
+                while (iter.hasNext()) {
+                    if (iter.next() > 0)
                         count++;
                 }
 
@@ -115,12 +120,12 @@ public class ArrayListBenchmarks {
                 return count;
             }
         }
-    
+
         public class Contains {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
             public int target;
-            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+            public LinkedList<Integer> data = new LinkedList<Integer>();
 
             @Setup
             public void setupData() {
@@ -137,8 +142,13 @@ public class ArrayListBenchmarks {
 
             @Benchmark
             public int loopContains() {
-                for (int i = 0; i < data.size(); i++) {
-                    if(data.get(i) == target) return data.get(i);
+                var iter = data.iterator();
+
+                while (iter.hasNext()) {
+                    var curr = iter.next();
+                    if (curr == target) {
+                        return curr;
+                    }
                 }
 
                 return -1;
@@ -147,17 +157,18 @@ public class ArrayListBenchmarks {
             @Benchmark
             public int iteratorContains() {
                 for (var value : data) {
-                    if(value == target) return value;
+                    if (value == target)
+                        return value;
                 }
 
                 return -1;
             }
         }
-    
+
         public class Filter {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+            public LinkedList<Integer> data = new LinkedList<Integer>();
 
             @Setup
             public void setupData() {
@@ -171,30 +182,35 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public ArrayList<Integer> loopFilter() {
-                var result = new ArrayList<Integer>();
-                for (int i = 0; i < data.size(); i++) {
-                    if(data.get(i) >= 0) result.add(data.get(i));
+            public LinkedList<Integer> loopFilter() {
+                var result = new LinkedList<Integer>();
+                var iter = data.iterator();
+
+                while (iter.hasNext()) {
+                    var curr = iter.next();
+                    if (curr >= 0)
+                        result.add(curr);
                 }
 
                 return result;
             }
 
             @Benchmark
-            public ArrayList<Integer> iteratorFilter() {
-                var result = new ArrayList<Integer>();
+            public LinkedList<Integer> iteratorFilter() {
+                var result = new LinkedList<Integer>();
                 for (var value : data) {
-                    if(value >= 0) result.add(value);
+                    if (value >= 0)
+                        result.add(value);
                 }
 
                 return result;
             }
         }
-    
+
         public class Copy {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+            public LinkedList<Integer> data = new LinkedList<Integer>();
 
             @Setup
             public void setupData() {
@@ -204,18 +220,20 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public ArrayList<Integer> loopCopy() {
-                var result = new ArrayList<Integer>(data.size());
-                for (int i = 0; i < data.size(); i++) {
-                    result.add(data.get(i));
+            public LinkedList<Integer> loopCopy() {
+                var result = new LinkedList<Integer>();
+                var iter = data.iterator();
+
+                while (iter.hasNext()) {
+                    result.add(iter.next());
                 }
 
                 return result;
             }
 
             @Benchmark
-            public ArrayList<Integer> iteratorCopy() {
-                var result = new ArrayList<Integer>(data.size());
+            public LinkedList<Integer> iteratorCopy() {
+                var result = new LinkedList<Integer>();
                 for (var value : data) {
                     result.add(value);
                 }
@@ -223,11 +241,11 @@ public class ArrayListBenchmarks {
                 return result;
             }
         }
-    
+
         public class Map {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Integer> data = new ArrayList<Integer>(N);
+            public LinkedList<Integer> data = new LinkedList<Integer>();
 
             @Setup
             public void setupData() {
@@ -237,18 +255,21 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public ArrayList<Integer> loopMap() {
-                var result = new ArrayList<Integer>(data.size());
-                for (int i = 0; i < data.size(); i++) {
-                    result.add(data.get(i) * data.get(i));
+            public LinkedList<Integer> loopMap() {
+                var result = new LinkedList<Integer>();
+                var iter = data.iterator();
+
+                while (iter.hasNext()) {
+                    var curr = iter.next();
+                    result.add(curr * curr);
                 }
 
                 return result;
             }
 
-            @Benchmark 
-            public ArrayList<Integer> iteratorMap() {
-                var result = new ArrayList<Integer>(data.size());
+            @Benchmark
+            public LinkedList<Integer> iteratorMap() {
+                var result = new LinkedList<Integer>();
                 for (var value : data) {
                     result.add(value * value);
                 }
@@ -262,30 +283,30 @@ public class ArrayListBenchmarks {
         public class Reduce {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Long> data = new ArrayList<Long>(N);
+            public LinkedList<Long> data = new LinkedList<Long>();
 
             @Setup
             public void setupData() {
                 for (int i = 1; i <= N; i++) {
-                    data.add((long) (i * N));
+                    data.add((long) i * N);
                 }
             }
 
             @Benchmark
-            public Long loopReduce() {
-                long total = 0L;
+            public long loopReduce() {
+                long total = 0;
+                var iter = data.iterator();
 
-                for (int i = 0; i < data.size(); i++) {
-                    total += data.get(i);
+                while (iter.hasNext()) {
+                    total += iter.next();
                 }
 
                 return total;
             }
 
             @Benchmark
-            public Long iteratorReduce() {
-                long total = 0L;
-
+            public long iteratorReduce() {
+                long total = 0;
                 for (var value : data) {
                     total += value;
                 }
@@ -297,18 +318,18 @@ public class ArrayListBenchmarks {
         public class Populate {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Long> data = new ArrayList<Long>(N);
+            public LinkedList<Long> data = new LinkedList<Long>();
 
             @Setup
             public void setupData() {
                 for (int i = 1; i <= N; i++) {
-                    data.add((long) (i * N));
+                    data.add((long) i);
                 }
             }
 
             @Benchmark
-            public ArrayList<Long> loopPopulate() {
-                var result = new ArrayList<Long>(data.size());
+            public LinkedList<Long> loopPopulate() {
+                var result = new LinkedList<Long>();
                 var rnd = new Random();
 
                 for (int i = 0; i < data.size(); i++) {
@@ -319,8 +340,8 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public ArrayList<Long> iteratorPopulate() {
-                var result = new ArrayList<Long>(data.size());
+            public LinkedList<Long> iteratorPopulate() {
+                var result = new LinkedList<Long>();
                 var rnd = new Random();
 
                 for (var value : data) {
@@ -334,7 +355,7 @@ public class ArrayListBenchmarks {
         public class Iterate {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Long> data = new ArrayList<Long>(N);
+            public LinkedList<Long> data = new LinkedList<Long>();
 
             @Setup
             public void setupData() {
@@ -345,10 +366,11 @@ public class ArrayListBenchmarks {
 
             @Benchmark
             public long loopIterate() {
-                long count = 0L;
+                long count = 0;
+                var iter = data.iterator();
 
-                for (int i = 0; i < data.size(); i++) {
-                    if (data.get(i) > 0)
+                while (iter.hasNext()) {
+                    if (iter.next() > 0)
                         count++;
                 }
 
@@ -357,8 +379,7 @@ public class ArrayListBenchmarks {
 
             @Benchmark
             public long iteratorIterate() {
-                long count = 0L;
-
+                long count = 0;
                 for (var value : data) {
                     if (value > 0)
                         ++count;
@@ -366,33 +387,39 @@ public class ArrayListBenchmarks {
 
                 return count;
             }
-
         }
 
         public class Contains {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
             public long target;
-            public ArrayList<Long> data = new ArrayList<Long>(N);
+            public LinkedList<Long> data = new LinkedList<Long>();
 
             @Setup
             public void setupData() {
+                int max = 101;
+                int min = 1;
                 var rnd = new Random();
-                target = (long) rnd.nextInt(101) * N;
+
+                target = (long) rnd.nextInt(max - min) - min;
 
                 for (int i = 1; i <= N; i++) {
-                    data.add((long) rnd.nextInt(101) * N);
+                    data.add(N * (long) rnd.nextInt(max - min) - min);
                 }
             }
 
             @Benchmark
             public long loopContains() {
-                for (int i = 0; i < data.size(); i++) {
-                    if (data.get(i) == target)
-                        return data.get(i);
+                var iter = data.iterator();
+
+                while (iter.hasNext()) {
+                    var curr = iter.next();
+                    if (curr == target) {
+                        return curr;
+                    }
                 }
 
-                return -1L;
+                return -1;
             }
 
             @Benchmark
@@ -402,43 +429,43 @@ public class ArrayListBenchmarks {
                         return value;
                 }
 
-                return -1L;
+                return -1;
             }
         }
 
         public class Filter {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Long> data = new ArrayList<Long>(N);
+            public LinkedList<Long> data = new LinkedList<Long>();
 
             @Setup
             public void setupData() {
-                var rnd = new Random();
                 int max = N;
                 int min = -N;
+                var rnd = new Random();
 
                 for (int i = 1; i <= N; i++) {
-                    long e = (long) rnd.nextInt(max - min) - min;
-                    data.add(e);
+                    data.add((long) rnd.nextInt(max - min) - min);
                 }
             }
 
             @Benchmark
-            public ArrayList<Long> loopFilter() {
-                var result = new ArrayList<Long>();
+            public LinkedList<Long> loopFilter() {
+                var result = new LinkedList<Long>();
+                var iter = data.iterator();
 
-                for (int i = 0; i < data.size(); i++) {
-                    if (data.get(i) >= 0)
-                        result.add(data.get(i));
+                while (iter.hasNext()) {
+                    var curr = iter.next();
+                    if (curr >= 0)
+                        result.add(curr);
                 }
 
                 return result;
             }
 
             @Benchmark
-            public ArrayList<Long> iteratorFilter() {
-                var result = new ArrayList<Long>();
-
+            public LinkedList<Long> iteratorFilter() {
+                var result = new LinkedList<Long>();
                 for (var value : data) {
                     if (value >= 0)
                         result.add(value);
@@ -446,78 +473,77 @@ public class ArrayListBenchmarks {
 
                 return result;
             }
-
         }
 
         public class Copy {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Long> data = new ArrayList<Long>(N);
+            public LinkedList<Long> data = new LinkedList<Long>();
 
             @Setup
             public void setupData() {
                 for (int i = 1; i <= N; i++) {
-                    data.add((long) (i));
+                    data.add((long) i * N);
                 }
             }
 
             @Benchmark
-            public ArrayList<Long> loopCopy() {
-                var copy = new ArrayList<Long>(data.size());
+            public LinkedList<Long> loopCopy() {
+                var result = new LinkedList<Long>();
+                var iter = data.iterator();
 
-                for (int i = 0; i < data.size(); i++) {
-                    copy.add(data.get(i));
+                while (iter.hasNext()) {
+                    result.add(iter.next());
                 }
 
-                return copy;
+                return result;
             }
 
             @Benchmark
-            public ArrayList<Long> iteratorCopy() {
-                var copy = new ArrayList<Long>(data.size());
-
+            public LinkedList<Long> iteratorCopy() {
+                var result = new LinkedList<Long>();
                 for (var value : data) {
-                    copy.add(value);
+                    result.add(value);
                 }
 
-                return copy;
+                return result;
             }
         }
 
         public class Map {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Long> data = new ArrayList<Long>(N);
+            public LinkedList<Long> data = new LinkedList<Long>();
 
             @Setup
             public void setupData() {
                 for (int i = 1; i <= N; i++) {
-                    data.add((long) (i));
+                    data.add((long) i * N);
                 }
             }
 
             @Benchmark
-            public ArrayList<Long> loopMap() {
-                var result = new ArrayList<Long>(data.size());
+            public LinkedList<Long> loopMap() {
+                var result = new LinkedList<Long>();
+                var iter = data.iterator();
 
-                for (int i = 0; i < data.size(); i++) {
-                    result.add(data.get(i) * N);
+                while (iter.hasNext()) {
+                    var curr = iter.next();
+                    result.add(curr * 5);
                 }
 
                 return result;
             }
 
             @Benchmark
-            public ArrayList<Long> iteratorMap() {
-                var result = new ArrayList<Long>(data.size());
-
+            public LinkedList<Long> iteratorMap() {
+                var result = new LinkedList<Long>();
                 for (var value : data) {
-                    result.add(value * N);
+                    result.add((long) value * 5);
                 }
 
                 return result;
             }
-
         }
     }
 
@@ -546,7 +572,7 @@ public class ArrayListBenchmarks {
         public class Reduce {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Student> students = new ArrayList<Student>(N);
+            public LinkedList<Student> students = new LinkedList<Student>();
 
             @Setup
             public void setupData() {
@@ -570,29 +596,30 @@ public class ArrayListBenchmarks {
 
             @Benchmark
             public String loopReduce() {
-                var sb = new StringBuilder();
-                for (int i = 0; i < students.size(); i++) {
+                var builder = new StringBuilder(students.size());
+                var iter = students.iterator();
 
-                    var s = students.get(i);
+                while (iter.hasNext()) {
+                    var s = iter.next();
                     var average = s.average;
                     var passed = average > 60 ? Integer.toString(average) : "Failed";
-                    sb.append(String.format("%s, %s, %s", s.lastName, s.firstName, passed));
+                    builder.append(String.format("%s, %s, %s", s.lastName, s.firstName, passed));
                 }
 
-                return sb.toString();
+                return builder.toString();
             }
 
             @Benchmark
             public String iteratorReduce() {
-                var sb = new StringBuilder();
+                var builder = new StringBuilder(students.size());
 
                 for (var s : students) {
                     var average = s.average;
                     var passed = average > 60 ? Integer.toString(average) : "Failed";
-                    sb.append(String.format("%s, %s, %s", s.lastName, s.firstName, passed));
+                    builder.append(String.format("%s, %s, %s", s.lastName, s.firstName, passed));
                 }
 
-                return sb.toString();
+                return builder.toString();
             }
         }
 
@@ -609,21 +636,23 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public ArrayList<Student> loopPopulate() {
+            public LinkedList<Student> loopPopulate() {
                 var rnd = new Random();
-                var result = new ArrayList<Student>(students.size());
+                var result = new LinkedList<Student>();
 
-                int maxF = ClassBenchmarks.firstNames.size();
-                int maxL = ClassBenchmarks.lastNames.size();
+                int max = 101;
+                int min = 50;
+                int fname = ClassBenchmarks.firstNames.size();
+                int lname = ClassBenchmarks.lastNames.size();
 
                 for (int i = 0; i < students.size(); i++) {
-                    var s = i;
+                    int n = i;
                     result.add(new Student() {
                         {
-                            firstName = ClassBenchmarks.firstNames.get(rnd.nextInt(maxF));
-                            lastName = ClassBenchmarks.lastNames.get(rnd.nextInt(maxL));
-                            average = rnd.nextInt(100 - 50) - 50;
-                            ID = s + rnd.nextLong();
+                            average = rnd.nextInt(max - min) - min;
+                            ID = n * N;
+                            firstName = ClassBenchmarks.firstNames.get(rnd.nextInt(fname));
+                            lastName = ClassBenchmarks.lastNames.get(rnd.nextInt(lname));
                         }
                     });
                 }
@@ -632,20 +661,22 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public ArrayList<Student> iteratorPopulate() {
+            public LinkedList<Student> iteratorPopulate() {
                 var rnd = new Random();
-                var result = new ArrayList<Student>(students.size());
+                var result = new LinkedList<Student>();
 
-                int maxF = ClassBenchmarks.firstNames.size();
-                int maxL = ClassBenchmarks.lastNames.size();
+                int max = 101;
+                int min = 50;
+                int fname = ClassBenchmarks.firstNames.size();
+                int lname = ClassBenchmarks.lastNames.size();
 
                 for (var s : students) {
                     result.add(new Student() {
                         {
-                            firstName = ClassBenchmarks.firstNames.get(rnd.nextInt(maxF));
-                            lastName = ClassBenchmarks.lastNames.get(rnd.nextInt(maxL));
-                            average = rnd.nextInt(100 - 50) - 50;
-                            ID = s + rnd.nextLong();
+                            average = rnd.nextInt(max - min) - min;
+                            ID = s * N;
+                            firstName = ClassBenchmarks.firstNames.get(rnd.nextInt(fname));
+                            lastName = ClassBenchmarks.lastNames.get(rnd.nextInt(lname));
                         }
                     });
                 }
@@ -657,7 +688,7 @@ public class ArrayListBenchmarks {
         public class Iterate {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Student> students = new ArrayList<Student>(N);
+            public LinkedList<Student> students = new LinkedList<Student>();
 
             @Setup
             public void setupData() {
@@ -682,10 +713,12 @@ public class ArrayListBenchmarks {
             @Benchmark
             public int loopIterate() {
                 int count = 0;
-                for (int i = 0; i < students.size(); i++) {
-                    var s = students.get(i);
+                var iter = students.iterator();
+
+                while (iter.hasNext()) {
+                    var s = iter.next();
                     if (s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE) {
-                        ++count;
+                        count++;
                     }
                 }
 
@@ -697,7 +730,7 @@ public class ArrayListBenchmarks {
                 int count = 0;
                 for (var s : students) {
                     if (s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE) {
-                        ++count;
+                        count++;
                     }
                 }
 
@@ -708,14 +741,11 @@ public class ArrayListBenchmarks {
         public class Contains {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public int target;
-            public ArrayList<Student> students = new ArrayList<Student>(N);
+            public LinkedList<Student> students = new LinkedList<Student>();
 
             @Setup
             public void setupData() {
                 var rnd = new Random();
-                target = rnd.nextInt(N - (-N)) - N;
-
                 int maxF = ClassBenchmarks.firstNames.size();
                 int maxL = ClassBenchmarks.lastNames.size();
 
@@ -734,26 +764,26 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public boolean loopContains() {
+            public Student loopContains() {
                 for (int i = 0; i < students.size(); i++) {
                     var s = students.get(i);
-                    if (s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
-                        return true;
+                    if(s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
+                        return s;
                     }
                 }
 
-                return false;
+                return null;
             }
 
             @Benchmark
-            public boolean iteratorContains() {
+            public Student iteratorContains() {
                 for (var s : students) {
-                    if (s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
-                        return true;
+                    if(s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
+                        return s;
                     }
                 }
 
-                return false;
+                return null;
             }
         }
 
@@ -761,15 +791,15 @@ public class ArrayListBenchmarks {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
             public int target;
-            public ArrayList<Student> students = new ArrayList<Student>(N);
+            public LinkedList<Student> students = new LinkedList<Student>();
 
             @Setup
             public void setupData() {
                 var rnd = new Random();
-                target = rnd.nextInt(N - (-N)) - N;
-
                 int maxF = ClassBenchmarks.firstNames.size();
                 int maxL = ClassBenchmarks.lastNames.size();
+
+                target = rnd.nextInt((N / 2)) - 1;
 
                 for (int i = 1; i <= N; i++) {
                     var s = new Student() {
@@ -786,10 +816,12 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public ArrayList<Student> loopFilter() {
-                var result = new ArrayList<Student>(students.size());
-                for (int i = 0; i < students.size(); i++) {
-                    var s = students.get(i);
+            public LinkedList<Student> loopFilter() {
+                var result = new LinkedList<Student>();
+                var iter = students.iterator();
+
+                while (iter.hasNext()) {
+                    var s = iter.next();
                     if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > target) {
                         result.add(s);
                     }
@@ -799,9 +831,9 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public ArrayList<Student> iteratorFilter() {
-                var result = new ArrayList<Student>(students.size());
-                for (var s : students) {
+            public LinkedList<Student> iteratorFilter() {
+                var result = new LinkedList<Student>();
+                for (var s : result) {
                     if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > target) {
                         result.add(s);
                     }
@@ -814,7 +846,7 @@ public class ArrayListBenchmarks {
         public class Copy {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Student> students = new ArrayList<Student>(N);
+            public LinkedList<Student> students = new LinkedList<Student>();
 
             @Setup
             public void setupData() {
@@ -837,10 +869,12 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public ArrayList<Student> loopCopy() {
-                var result = new ArrayList<Student>(students.size());
-                for (int i = 0; i < students.size(); i++) {
-                    var s = students.get(i);
+            public LinkedList<Student> loopCopy() {
+                var result = new LinkedList<Student>();
+                var iter = students.iterator();
+
+                while(iter.hasNext()) {
+                    var s = iter.next();
                     result.add(new Student() {
                         {
                             average = s.average;
@@ -855,8 +889,9 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public ArrayList<Student> iteratorCopy() {
-                var result = new ArrayList<Student>(students.size());
+            public LinkedList<Student> iteratorCopy() {
+                var result = new LinkedList<Student>();
+
                 for (var s : students) {
                     result.add(new Student() {
                         {
@@ -871,11 +906,11 @@ public class ArrayListBenchmarks {
                 return result;
             }
         }
-
+    
         public class Map {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
-            public ArrayList<Student> students = new ArrayList<Student>(N);
+            public LinkedList<Student> students = new LinkedList<Student>();
 
             @Setup
             public void setupData() {
@@ -900,11 +935,11 @@ public class ArrayListBenchmarks {
             @Benchmark
             public HashMap<Long, String> loopMap() {
                 var result = new HashMap<Long, String>(students.size());
-                for (int i = 0; i < students.size(); i++) {
-                    var s = students.get(i);
-                    var value = String.format("%s, %s", s.lastName, s.firstName);
+                var iter = students.iterator();
 
-                    result.put(s.ID, value);
+                while(iter.hasNext()) {
+                    var s = iter.next();
+                    result.put(s.ID, String.format("%s, %s", s.lastName, s.firstName));
                 }
 
                 return result;
@@ -914,8 +949,7 @@ public class ArrayListBenchmarks {
             public HashMap<Long, String> iteratorMap() {
                 var result = new HashMap<Long, String>(students.size());
                 for (var s : students) {
-                    var value = String.format("%s, %s", s.lastName, s.firstName);
-                    result.put(s.ID, value);
+                    result.put(s.ID, String.format("%s, %s", s.lastName, s.firstName));
                 }
 
                 return result;
