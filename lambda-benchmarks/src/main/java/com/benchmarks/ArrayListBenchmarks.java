@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.*;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;
@@ -21,6 +22,11 @@ public class ArrayListBenchmarks {
                 for (int i = 1; i <= N; i++) {
                     data.add(i);
                 }
+            }
+
+            @Benchmark
+            public int lambdaReduce() {
+                return data.stream().reduce(0, Integer::sum);
             }
 
             @Benchmark
@@ -54,6 +60,13 @@ public class ArrayListBenchmarks {
                 for (int i = 1; i <= N; i++) {
                     data.add(i);
                 }
+            }
+
+            @Benchmark
+            public ArrayList<Integer> lambdaPopulate() {
+                var rnd = new Random();
+                return Stream.iterate(rnd.nextInt(101), i -> rnd.nextInt(101)).limit(data.size())
+                        .collect(Collectors.toList());
             }
 
             @Benchmark
@@ -94,6 +107,11 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
+            public int lambdaCount() {
+                return data.stream().filter(n -> n > 0).count();
+            }
+
+            @Benchmark
             public int loopIterate() {
                 int count = 0;
                 for (int i = 0; i < data.size(); i++) {
@@ -115,7 +133,7 @@ public class ArrayListBenchmarks {
                 return count;
             }
         }
-    
+
         public class Contains {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
@@ -136,24 +154,31 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public int loopContains() {
-                for (int i = 0; i < data.size(); i++) {
-                    if(data.get(i) == target) return data.get(i);
-                }
-
-                return -1;
+            public boolean lambdaContains() {
+                return data.stream().anyMatch(n -> n = target);
             }
 
             @Benchmark
-            public int iteratorContains() {
-                for (var value : data) {
-                    if(value == target) return value;
+            public boolean loopContains() {
+                for (int i = 0; i < data.size(); i++) {
+                    if (data.get(i) == target)
+                        return true;
                 }
 
-                return -1;
+                return false;
+            }
+
+            @Benchmark
+            public boolean iteratorContains() {
+                for (var value : data) {
+                    if (value == target)
+                        return true;
+                }
+
+                return false;
             }
         }
-    
+
         public class Filter {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
@@ -171,10 +196,16 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
+            public ArrayList<Integer> lambdaFilter() {
+                return data.stream().filter(n -> n >= 0).collect(Collectors.toList());
+            }
+
+            @Benchmark
             public ArrayList<Integer> loopFilter() {
                 var result = new ArrayList<Integer>();
                 for (int i = 0; i < data.size(); i++) {
-                    if(data.get(i) >= 0) result.add(data.get(i));
+                    if (data.get(i) >= 0)
+                        result.add(data.get(i));
                 }
 
                 return result;
@@ -184,13 +215,14 @@ public class ArrayListBenchmarks {
             public ArrayList<Integer> iteratorFilter() {
                 var result = new ArrayList<Integer>();
                 for (var value : data) {
-                    if(value >= 0) result.add(value);
+                    if (value >= 0)
+                        result.add(value);
                 }
 
                 return result;
             }
         }
-    
+
         public class Copy {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
@@ -201,6 +233,11 @@ public class ArrayListBenchmarks {
                 for (int i = 1; i <= N; i++) {
                     data.add(i);
                 }
+            }
+
+            @Benchmark
+            public ArrayList<Integer> lambdaCopy() {
+                return data.stream().map(n -> n).collect(Collectors.toList());
             }
 
             @Benchmark
@@ -223,7 +260,7 @@ public class ArrayListBenchmarks {
                 return result;
             }
         }
-    
+
         public class Map {
             @Param({ "10", "100", "1000", "10000" })
             public int N;
@@ -237,6 +274,11 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
+            public ArrayList<Integer> lambdaMap() {
+                return data.stream().map(n -> n * n).collect(Collectors.toList());
+            }
+
+            @Benchmark
             public ArrayList<Integer> loopMap() {
                 var result = new ArrayList<Integer>(data.size());
                 for (int i = 0; i < data.size(); i++) {
@@ -246,7 +288,7 @@ public class ArrayListBenchmarks {
                 return result;
             }
 
-            @Benchmark 
+            @Benchmark
             public ArrayList<Integer> iteratorMap() {
                 var result = new ArrayList<Integer>(data.size());
                 for (var value : data) {
@@ -272,7 +314,12 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public Long loopReduce() {
+            public long lambdaReduce() {
+                return data.stream().reduce(0, Long::sum);
+            }
+
+            @Benchmark
+            public long loopReduce() {
                 long total = 0L;
 
                 for (int i = 0; i < data.size(); i++) {
@@ -283,7 +330,7 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public Long iteratorReduce() {
+            public long iteratorReduce() {
                 long total = 0L;
 
                 for (var value : data) {
@@ -304,6 +351,12 @@ public class ArrayListBenchmarks {
                 for (int i = 1; i <= N; i++) {
                     data.add((long) (i * N));
                 }
+            }
+
+            @Benchmark
+            public ArrayList<Long> lambdaPopulate() {
+                var rnd = new Random();
+                return Stream.iterate(rnd.nextLong(), i -> rnd.nextLong()).collect(Collectors.toList());
             }
 
             @Benchmark
@@ -341,6 +394,11 @@ public class ArrayListBenchmarks {
                 for (int i = 1; i <= N; i++) {
                     data.add((long) i);
                 }
+            }
+
+            @Benchmark
+            public long lambdaIterate() {
+                return data.stream().filter(n -> n > 0).count();
             }
 
             @Benchmark
@@ -386,23 +444,28 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
-            public long loopContains() {
-                for (int i = 0; i < data.size(); i++) {
-                    if (data.get(i) == target)
-                        return data.get(i);
-                }
-
-                return -1L;
+            public boolean lambdaContains() {
+                return data.stream().anyMatch(n -> n == target);
             }
 
             @Benchmark
-            public long iteratorContains() {
-                for (var value : data) {
-                    if (value == target)
-                        return value;
+            public boolean loopContains() {
+                for (int i = 0; i < data.size(); i++) {
+                    if (data.get(i) == target)
+                        return true;
                 }
 
-                return -1L;
+                return false;
+            }
+
+            @Benchmark
+            public boolean iteratorContains() {
+                for (var value : data) {
+                    if (value == target)
+                        return true;
+                }
+
+                return false;
             }
         }
 
@@ -421,6 +484,11 @@ public class ArrayListBenchmarks {
                     long e = (long) rnd.nextInt(max - min) - min;
                     data.add(e);
                 }
+            }
+
+            @Benchmark
+            public ArrayList<Long> lambdaFilter() {
+                return data.stream().filter(n -> n >= 0).collect(Collectors.toList());
             }
 
             @Benchmark
@@ -462,6 +530,11 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
+            public ArrayList<Long> lambdaCopy() {
+                return data.stream().map(n -> n).collect(Collectors.toList());
+            }
+
+            @Benchmark
             public ArrayList<Long> loopCopy() {
                 var copy = new ArrayList<Long>(data.size());
 
@@ -494,6 +567,11 @@ public class ArrayListBenchmarks {
                 for (int i = 1; i <= N; i++) {
                     data.add((long) (i));
                 }
+            }
+
+            @Benchmark
+            public ArrayList<Long> lambdaMap() {
+                return data.stream().map(n -> n * N).collect(Collectors.toList());
             }
 
             @Benchmark
@@ -569,6 +647,15 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
+            public String lambdaReduce() {
+                return students.stream()
+                        .map(s -> String.format("%s, %s, %s", s.lastName, s.firstName,
+                                (s.average > 60) ? Integer.toString(s.average) : "Failed"))
+                        .collect(StringBuilder::new, (sb, s) -> sb.append(s), (sb1, sb2) -> sb1.append(sb2.toString()))
+                        .toString();
+            }
+
+            @Benchmark
             public String loopReduce() {
                 var sb = new StringBuilder();
                 for (int i = 0; i < students.size(); i++) {
@@ -606,6 +693,24 @@ public class ArrayListBenchmarks {
                 for (int i = 1; i <= N; i++) {
                     students.add(i);
                 }
+            }
+
+            @Benchmark
+            public ArrayList<Student> lambdaPopulate() {
+                var rnd = new Random();
+                var result = new ArrayList<Student>(students.size());
+
+                int maxF = ClassBenchmarks.firstNames.size();
+                int maxL = ClassBenchmarks.lastNames.size();
+
+                return data.stream().map(i -> new Student() {
+                    {
+                        firstName = ClassBenchmarks.firstNames.get(rnd.nextInt(maxF));
+                        lastName = ClassBenchmarks.lastNames.get(rnd.nextInt(maxL));
+                        average = rnd.nextInt(100 - 50) - 50;
+                        ID = i + rnd.nextLong();
+                    }
+                }).collect(Collectors.toCollection(ArrayList::new));
             }
 
             @Benchmark
@@ -680,6 +785,12 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
+            public int lambdaIterate() {
+                return students.stream()
+                        .filter(s -> s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE).count();
+            }
+
+            @Benchmark
             public int loopIterate() {
                 int count = 0;
                 for (int i = 0; i < students.size(); i++) {
@@ -731,6 +842,12 @@ public class ArrayListBenchmarks {
 
                     students.add(s);
                 }
+            }
+
+            @Benchmark
+            public boolean lambdaContains() {
+                return students.stream().anyMatch(s -> s.average >= 70 && s.average <= 85 && s.firstName.contains(" ")
+                        && s.lastName.contains("es"));
             }
 
             @Benchmark
@@ -786,6 +903,13 @@ public class ArrayListBenchmarks {
             }
 
             @Benchmark
+            public ArrayList<Student> lambdaFilter() {
+                return students.stream()
+                        .filter(s -> s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > target)
+                        .collect(Collectors.toCollection(ArrayList::new));
+            }
+
+            @Benchmark
             public ArrayList<Student> loopFilter() {
                 var result = new ArrayList<Student>(students.size());
                 for (int i = 0; i < students.size(); i++) {
@@ -834,6 +958,18 @@ public class ArrayListBenchmarks {
 
                     students.add(s);
                 }
+            }
+
+            @Benchmark
+            public ArrayList<Student> lambdaCopy() {
+                return students.stream().map(s -> new Student() {
+                    {
+                        average = s.average;
+                        ID = s.ID;
+                        firstName = s.firstName;
+                        lastName = s.lastName;
+                    }
+                }).collect(Collectors.toCollection(ArrayList::new));
             }
 
             @Benchmark
@@ -895,6 +1031,11 @@ public class ArrayListBenchmarks {
 
                     students.add(s);
                 }
+            }
+
+            @Benchmark
+            public HashMap<Long, String> lambdaMap() {
+                return students.stream().collect(Collectors.toMap(s -> s.ID, s -> String.format("%s, %s", s.lastName, s.firstName)));
             }
 
             @Benchmark
