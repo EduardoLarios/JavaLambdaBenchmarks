@@ -65,230 +65,207 @@ public class HashSetLong {
         }
     }
 
-    public static class Reduce {
-
-        @Benchmark
-        public long lambdaReduce() {
-            return Bench.data.stream().reduce(0L, Long::sum);
-        }
-
-        @Benchmark
-        public long loopReduce() {
-            long total = 0L;
-            var iter = Bench.data.iterator();
-
-            while (iter.hasNext()) {
-                total += iter.next();
-            }
-
-            return total;
-        }
-
-        @Benchmark
-        public long iteratorReduce() {
-            long total = 0L;
-
-            for (var value : Bench.data) {
-                total += value;
-            }
-
-            return total;
-        }
+    @Benchmark
+    public long lambdaReduce() {
+        return Bench.data.stream().reduce(0L, Long::sum);
     }
 
-    public static class Populate {
+    @Benchmark
+    public long loopReduce() {
+        long total = 0L;
+        var iter = Bench.data.iterator();
 
-        @Benchmark
-        public HashSet<Long> lambdaPopulate() {
-            return Bench.range.stream().map(i -> i + i).collect(Collectors.toCollection(HashSet::new));
+        while (iter.hasNext()) {
+            total += iter.next();
         }
 
-        @Benchmark
-        public HashSet<Long> loopPopulate() {
-            var result = new HashSet<Long>(Bench.range.size());
-
-            for (int i = 0; i < Bench.range.size(); i++) {
-                var value = Bench.range.get(i);
-                result.add(value + value);
-            }
-
-            return result;
-        }
-
-        @Benchmark
-        public HashSet<Long> iteratorPopulate() {
-            var result = new HashSet<Long>(Bench.range.size());
-
-            for (var value : Bench.range) {
-                result.add(value + value);
-            }
-
-            return result;
-        }
+        return total;
     }
 
-    public static class Iterate {
+    @Benchmark
+    public long iteratorReduce() {
+        long total = 0L;
 
-        @Benchmark
-        public long lambdaIterate() {
-            return Bench.data.stream().filter(n -> n > 0).count();
+        for (var value : Bench.data) {
+            total += value;
         }
 
-        @Benchmark
-        public long loopIterate() {
-            long count = 0L;
-            var iter = Bench.data.iterator();
-
-            while (iter.hasNext()) {
-                if (iter.next() > 0)
-                    count++;
-            }
-
-            return count;
-        }
-
-        @Benchmark
-        public long iteratorIterate() {
-            long count = 0L;
-
-            for (var value : Bench.data) {
-                if (value > 0)
-                    count++;
-            }
-
-            return count;
-        }
-
+        return total;
     }
 
-    public static class Contains {
-
-        @Benchmark
-        public boolean lambdaContains() {
-            return Bench.contains.stream().anyMatch(n -> n == Bench.target);
-        }
-
-        @Benchmark
-        public boolean loopContains() {
-            var iter = Bench.contains.iterator();
-
-            while (iter.hasNext()) {
-                var value = iter.next();
-                if (value == Bench.target) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        @Benchmark
-        public boolean iteratorContains() {
-            for (var value : Bench.contains) {
-                if (value == Bench.target)
-                    return true;
-            }
-
-            return false;
-        }
+    @Benchmark
+    public HashSet<Long> lambdaPopulate() {
+        return Bench.range.stream().map(i -> i + i).collect(Collectors.toCollection(HashSet::new));
     }
 
-    public static class Filter {
+    @Benchmark
+    public HashSet<Long> loopPopulate() {
+        var result = new HashSet<Long>(Bench.range.size());
 
-        @Benchmark
-        public HashSet<Long> lambdaFilter() {
-            return Bench.filter.stream().filter(n -> n >= 0).collect(Collectors.toCollection(HashSet::new));
+        for (int i = 0; i < Bench.range.size(); i++) {
+            var value = Bench.range.get(i);
+            result.add(value + value);
         }
 
-        @Benchmark
-        public HashSet<Long> loopFilter() {
-            var result = new HashSet<Long>();
-            var iter = Bench.filter.iterator();
-
-            while (iter.hasNext()) {
-                var value = iter.next();
-                if (value >= 0) {
-                    result.add(value);
-                }
-            }
-
-            return result;
-        }
-
-        @Benchmark
-        public HashSet<Long> iteratorFilter() {
-            var result = new HashSet<Long>();
-
-            for (var value : Bench.filter) {
-                if (value >= 0)
-                    result.add(value);
-            }
-
-            return result;
-        }
-
+        return result;
     }
 
-    public static class Copy {
+    @Benchmark
+    public HashSet<Long> iteratorPopulate() {
+        var result = new HashSet<Long>(Bench.range.size());
 
-        @Benchmark
-        public HashSet<Long> lambdaCopy() {
-            return Bench.data.stream().map(n -> n).collect(Collectors.toCollection(HashSet::new));
+        for (var value : Bench.range) {
+            result.add(value + value);
         }
 
-        @Benchmark
-        public HashSet<Long> loopCopy() {
-            var copy = new HashSet<Long>(Bench.data.size());
-            var iter = Bench.data.iterator();
-
-            while (iter.hasNext()) {
-                copy.add(iter.next());
-            }
-
-            return copy;
-        }
-
-        @Benchmark
-        public HashSet<Long> iteratorCopy() {
-            var copy = new HashSet<Long>(Bench.data.size());
-
-            for (var value : Bench.data) {
-                copy.add(value);
-            }
-
-            return copy;
-        }
+        return result;
     }
 
-    public static class Map {
+    @Benchmark
+    public long lambdaIterate() {
+        return Bench.data.stream().filter(n -> n > 0).count();
+    }
 
-        @Benchmark
-        public HashSet<Long> lambdaMap() {
-            return Bench.data.stream().map(n -> n * 10).collect(Collectors.toCollection(HashSet::new));
+    @Benchmark
+    public long loopIterate() {
+        long count = 0L;
+        var iter = Bench.data.iterator();
+
+        while (iter.hasNext()) {
+            if (iter.next() > 0)
+                count++;
         }
 
-        @Benchmark
-        public HashSet<Long> loopMap() {
-            var result = new HashSet<Long>(Bench.data.size());
-            var iter = Bench.data.iterator();
+        return count;
+    }
 
-            while (iter.hasNext()) {
-                var value = iter.next();
-                result.add(value * 10);
+    @Benchmark
+    public long iteratorIterate() {
+        long count = 0L;
+
+        for (var value : Bench.data) {
+            if (value > 0)
+                count++;
+        }
+
+        return count;
+    }
+
+    @Benchmark
+    public boolean lambdaContains() {
+        return Bench.contains.stream().anyMatch(n -> n == Bench.target);
+    }
+
+    @Benchmark
+    public boolean loopContains() {
+        var iter = Bench.contains.iterator();
+
+        while (iter.hasNext()) {
+            var value = iter.next();
+            if (value == Bench.target) {
+                return true;
             }
-
-            return result;
         }
 
-        @Benchmark
-        public HashSet<Long> iteratorMap() {
-            var result = new HashSet<Long>(Bench.data.size());
+        return false;
+    }
 
-            for (var value : Bench.data) {
-                result.add(value * 10);
+    @Benchmark
+    public boolean iteratorContains() {
+        for (var value : Bench.contains) {
+            if (value == Bench.target)
+                return true;
+        }
+
+        return false;
+    }
+
+    @Benchmark
+    public HashSet<Long> lambdaFilter() {
+        return Bench.filter.stream().filter(n -> n >= 0).collect(Collectors.toCollection(HashSet::new));
+    }
+
+    @Benchmark
+    public HashSet<Long> loopFilter() {
+        var result = new HashSet<Long>();
+        var iter = Bench.filter.iterator();
+
+        while (iter.hasNext()) {
+            var value = iter.next();
+            if (value >= 0) {
+                result.add(value);
             }
-
-            return result;
         }
+
+        return result;
+    }
+
+    @Benchmark
+    public HashSet<Long> iteratorFilter() {
+        var result = new HashSet<Long>();
+
+        for (var value : Bench.filter) {
+            if (value >= 0)
+                result.add(value);
+        }
+
+        return result;
+    }
+
+    @Benchmark
+    public HashSet<Long> lambdaCopy() {
+        return Bench.data.stream().map(n -> n).collect(Collectors.toCollection(HashSet::new));
+    }
+
+    @Benchmark
+    public HashSet<Long> loopCopy() {
+        var copy = new HashSet<Long>(Bench.data.size());
+        var iter = Bench.data.iterator();
+
+        while (iter.hasNext()) {
+            copy.add(iter.next());
+        }
+
+        return copy;
+    }
+
+    @Benchmark
+    public HashSet<Long> iteratorCopy() {
+        var copy = new HashSet<Long>(Bench.data.size());
+
+        for (var value : Bench.data) {
+            copy.add(value);
+        }
+
+        return copy;
+    }
+
+    @Benchmark
+    public HashSet<Long> lambdaMap() {
+        return Bench.data.stream().map(n -> n * 10).collect(Collectors.toCollection(HashSet::new));
+    }
+
+    @Benchmark
+    public HashSet<Long> loopMap() {
+        var result = new HashSet<Long>(Bench.data.size());
+        var iter = Bench.data.iterator();
+
+        while (iter.hasNext()) {
+            var value = iter.next();
+            result.add(value * 10);
+        }
+
+        return result;
+    }
+
+    @Benchmark
+    public HashSet<Long> iteratorMap() {
+        var result = new HashSet<Long>(Bench.data.size());
+
+        for (var value : Bench.data) {
+            result.add(value * 10);
+        }
+
+        return result;
     }
 }

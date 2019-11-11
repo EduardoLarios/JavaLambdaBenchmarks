@@ -23,8 +23,8 @@ public class ArrayListClass {
         @Param({ "10", "100", "1000", "10000" })
         public static int N;
         public static int target;
-        public static ArrayList<Student> students = new ArrayList<Student>(N);
-        public static ArrayList<Integer> data = new ArrayList<Integer>(N);
+        public static ArrayList<Student> students;
+        public static ArrayList<Integer> data;
 
         public static List<String> firstNames = new ArrayList<String>(List.of(
                 // Simple Male
@@ -45,6 +45,8 @@ public class ArrayListClass {
             var rnd = new Random();
             int maxF = firstNames.size();
             int maxL = lastNames.size();
+
+            students = new ArrayList<Student>(N);
             target = rnd.nextInt(Bench.N - (-Bench.N)) - Bench.N;
 
             for (int i = 1; i <= N; i++) {
@@ -63,316 +65,294 @@ public class ArrayListClass {
 
         @Setup(Level.Trial)
         public void setupData() {
+            data = new ArrayList<Integer>(N);
             for (int i = 1; i <= N; i++) {
                 data.add(i);
             }
         }
     }
 
-    public static class Reduce {
-
-        @Benchmark
-        public String lambdaReduce() {
-            return Bench.students.stream()
-                    .map(s -> String.format("%s, %s, %s", s.lastName, s.firstName,
-                            (s.average > 60) ? Integer.toString(s.average) : "Failed"))
-                    .collect(StringBuilder::new, (sb, s) -> sb.append(s), (sb1, sb2) -> sb1.append(sb2.toString()))
-                    .toString();
-        }
-
-        @Benchmark
-        public String loopReduce() {
-            var sb = new StringBuilder();
-            var size = Bench.students.size();
-
-            for (int i = 0; i < size; i++) {
-                var s = Bench.students.get(i);
-                var average = s.average;
-                var passed = average > 60 ? Integer.toString(average) : "Failed";
-                sb.append(String.format("%s, %s, %s", s.lastName, s.firstName, passed));
-            }
-
-            return sb.toString();
-        }
-
-        @Benchmark
-        public String iteratorReduce() {
-            var sb = new StringBuilder();
-
-            for (var s : Bench.students) {
-                var average = s.average;
-                var passed = average > 60 ? Integer.toString(average) : "Failed";
-                sb.append(String.format("%s, %s, %s", s.lastName, s.firstName, passed));
-            }
-
-            return sb.toString();
-        }
+    @Benchmark
+    public String lambdaReduce() {
+        return Bench.students.stream()
+                .map(s -> String.format("%s, %s, %s", s.lastName, s.firstName,
+                        (s.average > 60) ? Integer.toString(s.average) : "Failed"))
+                .collect(StringBuilder::new, (sb, s) -> sb.append(s), (sb1, sb2) -> sb1.append(sb2.toString()))
+                .toString();
     }
 
-    public static class Populate {
+    @Benchmark
+    public String loopReduce() {
+        var sb = new StringBuilder();
 
-        @Benchmark
-        public ArrayList<Student> lambdaPopulate() {
-            var rnd = new Random();
-            int maxF = Bench.firstNames.size();
-            int maxL = Bench.lastNames.size();
+        for (int i = 0; i < Bench.students.size(); i++) {
+            Student s = Bench.students.get(i);
+            var passed = s.average > 60 ? Integer.toString(s.average) : "Failed";
+            sb.append(String.format("%s, %s, %s", s.lastName, s.firstName, passed));
+        }
 
-            return Bench.data.stream().map(i -> new Student() {
+        return sb.toString();
+    }
+
+    @Benchmark
+    public String iteratorReduce() {
+        var sb = new StringBuilder();
+
+        for (var s : Bench.students) {
+            var average = s.average;
+            var passed = average > 60 ? Integer.toString(average) : "Failed";
+            sb.append(String.format("%s, %s, %s", s.lastName, s.firstName, passed));
+        }
+
+        return sb.toString();
+    }
+
+    @Benchmark
+    public ArrayList<Student> lambdaPopulate() {
+        var rnd = new Random();
+        int maxF = Bench.firstNames.size();
+        int maxL = Bench.lastNames.size();
+
+        return Bench.data.stream().map(i -> new Student() {
+            {
+                firstName = Bench.firstNames.get(rnd.nextInt(maxF));
+                lastName = Bench.lastNames.get(rnd.nextInt(maxL));
+                average = rnd.nextInt(100 - 50) - 50;
+                ID = i + rnd.nextLong();
+            }
+        }).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    @Benchmark
+    public ArrayList<Student> loopPopulate() {
+        int size = Bench.data.size();
+        int maxF = Bench.firstNames.size();
+        int maxL = Bench.lastNames.size();
+
+        var rnd = new Random();
+        var result = new ArrayList<Student>(size);
+
+        for (int i = 0; i < size; i++) {
+            var s = i;
+            result.add(new Student() {
+                {
+                    firstName = Bench.firstNames.get(rnd.nextInt(maxF));
+                    lastName = Bench.lastNames.get(rnd.nextInt(maxL));
+                    average = rnd.nextInt(100 - 50) - 50;
+                    ID = s + rnd.nextLong();
+                }
+            });
+        }
+
+        return result;
+    }
+
+    @Benchmark
+    public ArrayList<Student> iteratorPopulate() {
+        int maxF = Bench.firstNames.size();
+        int maxL = Bench.lastNames.size();
+        int size = Bench.students.size();
+
+        var rnd = new Random();
+        var result = new ArrayList<Student>(size);
+
+        for (var i : Bench.data) {
+            result.add(new Student() {
                 {
                     firstName = Bench.firstNames.get(rnd.nextInt(maxF));
                     lastName = Bench.lastNames.get(rnd.nextInt(maxL));
                     average = rnd.nextInt(100 - 50) - 50;
                     ID = i + rnd.nextLong();
                 }
-            }).collect(Collectors.toCollection(ArrayList::new));
+            });
         }
 
-        @Benchmark
-        public ArrayList<Student> loopPopulate() {
-            int size = Bench.data.size();
-            int maxF = Bench.firstNames.size();
-            int maxL = Bench.lastNames.size();
-
-            var rnd = new Random();
-            var result = new ArrayList<Student>(size);
-
-            for (int i = 0; i < size; i++) {
-                var s = i;
-                result.add(new Student() {
-                    {
-                        firstName = Bench.firstNames.get(rnd.nextInt(maxF));
-                        lastName = Bench.lastNames.get(rnd.nextInt(maxL));
-                        average = rnd.nextInt(100 - 50) - 50;
-                        ID = s + rnd.nextLong();
-                    }
-                });
-            }
-
-            return result;
-        }
-
-        @Benchmark
-        public ArrayList<Student> iteratorPopulate() {
-            int maxF = Bench.firstNames.size();
-            int maxL = Bench.lastNames.size();
-            int size = Bench.students.size();
-
-            var rnd = new Random();
-            var result = new ArrayList<Student>(size);
-
-            for (var i : Bench.data) {
-                result.add(new Student() {
-                    {
-                        firstName = Bench.firstNames.get(rnd.nextInt(maxF));
-                        lastName = Bench.lastNames.get(rnd.nextInt(maxL));
-                        average = rnd.nextInt(100 - 50) - 50;
-                        ID = i + rnd.nextLong();
-                    }
-                });
-            }
-
-            return result;
-        }
+        return result;
     }
 
-    public static class Iterate {
-
-        @Benchmark
-        public int lambdaIterate() {
-            return (int) Bench.students.stream()
-                    .filter(s -> s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE).count();
-        }
-
-        @Benchmark
-        public int loopIterate() {
-            int count = 0;
-            int size = Bench.students.size();
-
-            for (int i = 0; i < size; i++) {
-                var s = Bench.students.get(i);
-                if (s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE) {
-                    count++;
-                }
-            }
-
-            return count;
-        }
-
-        @Benchmark
-        public int iteratorIterate() {
-            int count = 0;
-            for (var s : Bench.students) {
-                if (s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE) {
-                    count++;
-                }
-            }
-
-            return count;
-        }
+    @Benchmark
+    public int lambdaIterate() {
+        return (int) Bench.students.stream()
+                .filter(s -> s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE).count();
     }
 
-    public static class Contains {
+    @Benchmark
+    public int loopIterate() {
+        int count = 0;
+        int size = Bench.students.size();
 
-        @Benchmark
-        public boolean lambdaContains() {
-            return Bench.students.stream().anyMatch(
-                    s -> s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es"));
-        }
-
-        @Benchmark
-        public boolean loopContains() {
-            int size = Bench.students.size();
-
-            for (int i = 0; i < size; i++) {
-                var s = Bench.students.get(i);
-                if (s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
-                    return true;
-                }
+        for (int i = 0; i < size; i++) {
+            var s = Bench.students.get(i);
+            if (s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE) {
+                count++;
             }
-
-            return false;
         }
 
-        @Benchmark
-        public boolean iteratorContains() {
-            for (var s : Bench.students) {
-                if (s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        return count;
     }
 
-    public static class Filter {
-
-        @Benchmark
-        public ArrayList<Student> lambdaFilter() {
-            return Bench.students.stream()
-                    .filter(s -> s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target)
-                    .collect(Collectors.toCollection(ArrayList::new));
-        }
-
-        @Benchmark
-        public ArrayList<Student> loopFilter() {
-            int size = Bench.students.size();
-            var result = new ArrayList<Student>(size);
-
-            for (int i = 0; i < size; i++) {
-                var s = Bench.students.get(i);
-                if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target) {
-                    result.add(s);
-                }
+    @Benchmark
+    public int iteratorIterate() {
+        int count = 0;
+        for (var s : Bench.students) {
+            if (s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE) {
+                count++;
             }
-
-            return result;
         }
 
-        @Benchmark
-        public ArrayList<Student> iteratorFilter() {
-            int size = Bench.students.size();
-            var result = new ArrayList<Student>(size);
-            for (var s : Bench.students) {
-                if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target) {
-                    result.add(s);
-                }
-            }
-
-            return result;
-        }
+        return count;
     }
 
-    public static class Copy {
+    @Benchmark
+    public boolean lambdaContains() {
+        return Bench.students.stream().anyMatch(
+                s -> s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es"));
+    }
 
-        @Benchmark
-        public ArrayList<Student> lambdaCopy() {
-            return Bench.students.stream().map(s -> new Student() {
+    @Benchmark
+    public boolean loopContains() {
+        int size = Bench.students.size();
+
+        for (int i = 0; i < size; i++) {
+            var s = Bench.students.get(i);
+            if (s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Benchmark
+    public boolean iteratorContains() {
+        for (var s : Bench.students) {
+            if (s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Benchmark
+    public ArrayList<Student> lambdaFilter() {
+        return Bench.students.stream()
+                .filter(s -> s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    @Benchmark
+    public ArrayList<Student> loopFilter() {
+        int size = Bench.students.size();
+        var result = new ArrayList<Student>(size);
+
+        for (int i = 0; i < size; i++) {
+            var s = Bench.students.get(i);
+            if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target) {
+                result.add(s);
+            }
+        }
+
+        return result;
+    }
+
+    @Benchmark
+    public ArrayList<Student> iteratorFilter() {
+        int size = Bench.students.size();
+        var result = new ArrayList<Student>(size);
+        for (var s : Bench.students) {
+            if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target) {
+                result.add(s);
+            }
+        }
+
+        return result;
+    }
+
+    @Benchmark
+    public ArrayList<Student> lambdaCopy() {
+        return Bench.students.stream().map(s -> new Student() {
+            {
+                average = s.average;
+                ID = s.ID;
+                firstName = s.firstName;
+                lastName = s.lastName;
+            }
+        }).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    @Benchmark
+    public ArrayList<Student> loopCopy() {
+        int size = Bench.students.size();
+        var result = new ArrayList<Student>(size);
+
+        for (int i = 0; i < size; i++) {
+            var s = Bench.students.get(i);
+
+            result.add(new Student() {
                 {
                     average = s.average;
                     ID = s.ID;
                     firstName = s.firstName;
                     lastName = s.lastName;
                 }
-            }).collect(Collectors.toCollection(ArrayList::new));
+            });
         }
 
-        @Benchmark
-        public ArrayList<Student> loopCopy() {
-            int size = Bench.students.size();
-            var result = new ArrayList<Student>(size);
-
-            for (int i = 0; i < size; i++) {
-                var s = Bench.students.get(i);
-
-                result.add(new Student() {
-                    {
-                        average = s.average;
-                        ID = s.ID;
-                        firstName = s.firstName;
-                        lastName = s.lastName;
-                    }
-                });
-            }
-
-            return result;
-        }
-
-        @Benchmark
-        public ArrayList<Student> iteratorCopy() {
-            int size = Bench.students.size();
-            var result = new ArrayList<Student>(size);
-
-            for (var s : Bench.students) {
-                result.add(new Student() {
-                    {
-                        average = s.average;
-                        ID = s.ID;
-                        firstName = s.firstName;
-                        lastName = s.lastName;
-                    }
-                });
-            }
-
-            return result;
-        }
+        return result;
     }
 
-    public static class Map {
+    @Benchmark
+    public ArrayList<Student> iteratorCopy() {
+        int size = Bench.students.size();
+        var result = new ArrayList<Student>(size);
 
-        @Benchmark
-        public HashMap<Long, String> lambdaMap() {
-            return new HashMap<Long, String>(Bench.students.stream()
-                    .collect(Collectors.toMap(s -> s.ID, s -> String.format("%s, %s", s.lastName, s.firstName))));
-
+        for (var s : Bench.students) {
+            result.add(new Student() {
+                {
+                    average = s.average;
+                    ID = s.ID;
+                    firstName = s.firstName;
+                    lastName = s.lastName;
+                }
+            });
         }
 
-        @Benchmark
-        public HashMap<Long, String> loopMap() {
-            int size = Bench.students.size();
-            var result = new HashMap<Long, String>(size);
+        return result;
+    }
 
-            for (int i = 0; i < size; i++) {
-                var s = Bench.students.get(i);
-                var value = String.format("%s, %s", s.lastName, s.firstName);
+    @Benchmark
+    public HashMap<Long, String> lambdaMap() {
+        return new HashMap<Long, String>(Bench.students.stream()
+                .collect(Collectors.toMap(s -> s.ID, s -> String.format("%s, %s", s.lastName, s.firstName))));
 
-                result.put(s.ID, value);
-            }
+    }
 
-            return result;
+    @Benchmark
+    public HashMap<Long, String> loopMap() {
+        int size = Bench.students.size();
+        var result = new HashMap<Long, String>(size);
+
+        for (int i = 0; i < size; i++) {
+            var s = Bench.students.get(i);
+            var value = String.format("%s, %s", s.lastName, s.firstName);
+
+            result.put(s.ID, value);
         }
 
-        @Benchmark
-        public HashMap<Long, String> iteratorMap() {
-            int size = Bench.students.size();
-            var result = new HashMap<Long, String>(size);
+        return result;
+    }
 
-            for (var s : Bench.students) {
-                var value = String.format("%s, %s", s.lastName, s.firstName);
-                result.put(s.ID, value);
-            }
+    @Benchmark
+    public HashMap<Long, String> iteratorMap() {
+        int size = Bench.students.size();
+        var result = new HashMap<Long, String>(size);
 
-            return result;
+        for (var s : Bench.students) {
+            var value = String.format("%s, %s", s.lastName, s.firstName);
+            result.put(s.ID, value);
         }
+
+        return result;
     }
 }

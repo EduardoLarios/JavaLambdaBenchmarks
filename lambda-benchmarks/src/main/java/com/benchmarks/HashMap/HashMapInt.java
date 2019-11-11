@@ -56,228 +56,207 @@ public class HashMapInt {
 
     }
 
-    public static class Reduce {
-
-        @Benchmark
-        public int lambdaReduce() {
-            return Bench.data.values().stream().reduce(0, Integer::sum);
-        }
-
-        @Benchmark
-        public int loopReduce() {
-            int total = 0;
-            var iter = Bench.data.values().iterator();
-
-            while(iter.hasNext()) {
-                total += iter.next();
-            }
-
-            return total;
-        }
-
-        @Benchmark
-        public int iteratorReduce() {
-            int total = 0;
-            for (var value : Bench.data.values()) {
-                total += value;
-            }
-
-            return total;
-        }
+    @Benchmark
+    public int lambdaReduce() {
+        return Bench.data.values().stream().reduce(0, Integer::sum);
     }
 
-    public static class Populate {
-        
-        @Benchmark
-        public HashMap<Integer, Integer> lambdaPopulate() {
-            return new HashMap<Integer, Integer>(Bench.range.stream().collect(Collectors.toMap(k -> k, v -> v * 5)));
+    @Benchmark
+    public int loopReduce() {
+        int total = 0;
+        var iter = Bench.data.values().iterator();
+
+        while(iter.hasNext()) {
+            total += iter.next();
         }
 
-        @Benchmark
-        public HashMap<Integer, Integer> loopPopulate() {
-            var map = new HashMap<Integer, Integer>(Bench.N);
-
-            for (int i = 1; i <= Bench.N; i++) {
-                map.put(i, i * 5);
-            }
-
-            return map;
-        }
-
-        @Benchmark
-        public HashMap<Integer, Integer> iteratorPopulate() {
-            var map = new HashMap<Integer, Integer>(Bench.N);
-
-            for (var value : Bench.range) {
-                map.put(value, value * 5);
-            }
-
-            return map;
-        }
+        return total;
     }
 
-    public static class Iterate {
-        
-        @Benchmark
-        public int lambdaIterate() {
-            return (int) Bench.data.values().stream().filter(n -> n < Integer.MAX_VALUE).count();
+    @Benchmark
+    public int iteratorReduce() {
+        int total = 0;
+        for (var value : Bench.data.values()) {
+            total += value;
         }
 
-        @Benchmark
-        public int loopIterate() {
-            int count = 0;
-            var iter = Bench.data.values().iterator();
-
-            while(iter.hasNext()) {
-                var value = iter.next();
-                if(value < Integer.MAX_VALUE) {
-                    count++;
-                }
-            }
-
-            return count;
-        }
-
-        @Benchmark
-        public int iteratorIterate() {
-            int count = 0;
-
-            for (var value : Bench.data.values()) {
-                if(value < Integer.MAX_VALUE) {
-                    count++;
-                }
-            }
-
-            return count;
-        }
+        return total;
     }
 
-    public static class Contains {
-
-        @Benchmark
-        public boolean loopContains() {
-            var iter = Bench.contains.values().iterator();
-
-            while(iter.hasNext()) {
-                if(iter.next() == Bench.target) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        @Benchmark
-        public boolean iteratorContains() {
-            for (var value : Bench.contains.values()) {
-                if(value == Bench.target) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+    @Benchmark
+    public HashMap<Integer, Integer> lambdaPopulate() {
+        return new HashMap<Integer, Integer>(Bench.range.stream().collect(Collectors.toMap(k -> k, v -> v * 5)));
     }
 
-    public static class Filter {
+    @Benchmark
+    public HashMap<Integer, Integer> loopPopulate() {
+        var map = new HashMap<Integer, Integer>(Bench.N);
 
-        @Benchmark
-        public HashMap<Integer, Integer> lambdaFilter() {
-            return new HashMap<Integer, Integer>(Bench.data.keySet().stream().filter(k -> k % 2 == 0).collect(Collectors.toMap(k -> k, v -> v * 10)));
+        for (int i = 1; i <= Bench.N; i++) {
+            map.put(i, i * 5);
         }
 
-        @Benchmark
-        public HashMap<Integer, Integer> loopFilter() {
-            var iter = Bench.data.keySet().iterator();
-            var result = new HashMap<Integer, Integer>();
-
-            while(iter.hasNext()) {
-                var key = iter.next();
-                if(key % 2 == 0) {
-                    result.put(key, key * 10);
-                }
-            }
-
-            return result;
-        }
-
-        @Benchmark
-        public HashMap<Integer, Integer> iteratorFilter() {
-            var result = new HashMap<Integer, Integer>();
-            for (var key : Bench.data.keySet()) {
-                if(key % 2 == 0) {
-                    result.put(key, key * 10);
-                }
-            }
-
-            return result;
-        }
+        return map;
     }
 
-    public static class Copy {
+    @Benchmark
+    public HashMap<Integer, Integer> iteratorPopulate() {
+        var map = new HashMap<Integer, Integer>(Bench.N);
 
-        @Benchmark
-        public HashMap<Integer, Integer> lambdaCopy() {
-            var map = Bench.data;
-            return new HashMap<Integer, Integer>(map.keySet().stream().collect(Collectors.toMap(k -> k, k -> map.get(k))));
+        for (var value : Bench.range) {
+            map.put(value, value * 5);
         }
 
-        @Benchmark
-        public HashMap<Integer, Integer> loopCopy() {
-            var result = new HashMap<Integer, Integer>(Bench.data.size());
-            var iter = Bench.data.keySet().iterator();
-
-            while(iter.hasNext()) {
-                var key = iter.next();
-                result.put(key, Bench.data.get(key));
-            }
-
-            return result;
-        }
-
-        @Benchmark
-        public HashMap<Integer, Integer> iteratorCopy() {
-            var result = new HashMap<Integer, Integer>(Bench.data.size());
-            for (var key : Bench.data.keySet()) {
-                result.put(key, Bench.data.get(key));
-            }
-
-            return result;
-        }
+        return map;
     }
 
-    public static class Map {
+    @Benchmark
+    public int lambdaIterate() {
+        return (int) Bench.data.values().stream().filter(n -> n < Integer.MAX_VALUE).count();
+    }
 
-        @Benchmark
-        public HashMap<Integer, Integer> lambdaMap() {
-            var map = Bench.data;
-            return new HashMap<Integer, Integer>(map.keySet().stream().collect(Collectors.toMap(k -> k * 10, k -> map.get(k) * 10)));
-        }
+    @Benchmark
+    public int loopIterate() {
+        int count = 0;
+        var iter = Bench.data.values().iterator();
 
-        @Benchmark
-        public HashMap<Integer, Integer> loopMap() {
-            var result = new HashMap<Integer, Integer>(Bench.data.size());
-            var iter = Bench.data.keySet().iterator();
-
-            while(iter.hasNext()) {
-                var key = iter.next();
-                var value = Bench.data.get(key);
-
-                result.put(key * 10, value * 10);
+        while(iter.hasNext()) {
+            var value = iter.next();
+            if(value < Integer.MAX_VALUE) {
+                count++;
             }
-
-            return result;
         }
 
-        @Benchmark
-        public HashMap<Integer, Integer> iteratorMap() {
-            var result = new HashMap<Integer, Integer>(Bench.data.size());
-            for (var key : Bench.data.keySet()) {
-                var value = Bench.data.get(key);
-                result.put(key * 10, value * 10);
+        return count;
+    }
+
+    @Benchmark
+    public int iteratorIterate() {
+        int count = 0;
+
+        for (var value : Bench.data.values()) {
+            if(value < Integer.MAX_VALUE) {
+                count++;
             }
-
-            return result;
         }
+
+        return count;
+    }
+
+    @Benchmark
+    public boolean loopContains() {
+        var iter = Bench.contains.values().iterator();
+
+        while(iter.hasNext()) {
+            if(iter.next() == Bench.target) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Benchmark
+    public boolean iteratorContains() {
+        for (var value : Bench.contains.values()) {
+            if(value == Bench.target) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Benchmark
+    public HashMap<Integer, Integer> lambdaFilter() {
+        return new HashMap<Integer, Integer>(Bench.data.keySet().stream().filter(k -> k % 2 == 0).collect(Collectors.toMap(k -> k, v -> v * 10)));
+    }
+
+    @Benchmark
+    public HashMap<Integer, Integer> loopFilter() {
+        var iter = Bench.data.keySet().iterator();
+        var result = new HashMap<Integer, Integer>();
+
+        while(iter.hasNext()) {
+            var key = iter.next();
+            if(key % 2 == 0) {
+                result.put(key, key * 10);
+            }
+        }
+
+        return result;
+    }
+
+    @Benchmark
+    public HashMap<Integer, Integer> iteratorFilter() {
+        var result = new HashMap<Integer, Integer>();
+        for (var key : Bench.data.keySet()) {
+            if(key % 2 == 0) {
+                result.put(key, key * 10);
+            }
+        }
+
+        return result;
+    }
+
+    @Benchmark
+    public HashMap<Integer, Integer> lambdaCopy() {
+        var map = Bench.data;
+        return new HashMap<Integer, Integer>(map.keySet().stream().collect(Collectors.toMap(k -> k, k -> map.get(k))));
+    }
+
+    @Benchmark
+    public HashMap<Integer, Integer> loopCopy() {
+        var result = new HashMap<Integer, Integer>(Bench.data.size());
+        var iter = Bench.data.keySet().iterator();
+
+        while(iter.hasNext()) {
+            var key = iter.next();
+            result.put(key, Bench.data.get(key));
+        }
+
+        return result;
+    }
+
+    @Benchmark
+    public HashMap<Integer, Integer> iteratorCopy() {
+        var result = new HashMap<Integer, Integer>(Bench.data.size());
+        for (var key : Bench.data.keySet()) {
+            result.put(key, Bench.data.get(key));
+        }
+
+        return result;
+    }
+
+    @Benchmark
+    public HashMap<Integer, Integer> lambdaMap() {
+        var map = Bench.data;
+        return new HashMap<Integer, Integer>(map.keySet().stream().collect(Collectors.toMap(k -> k * 10, k -> map.get(k) * 10)));
+    }
+
+    @Benchmark
+    public HashMap<Integer, Integer> loopMap() {
+        var result = new HashMap<Integer, Integer>(Bench.data.size());
+        var iter = Bench.data.keySet().iterator();
+
+        while(iter.hasNext()) {
+            var key = iter.next();
+            var value = Bench.data.get(key);
+
+            result.put(key * 10, value * 10);
+        }
+
+        return result;
+    }
+
+    @Benchmark
+    public HashMap<Integer, Integer> iteratorMap() {
+        var result = new HashMap<Integer, Integer>(Bench.data.size());
+        for (var key : Bench.data.keySet()) {
+            var value = Bench.data.get(key);
+            result.put(key * 10, value * 10);
+        }
+
+        return result;
     }
 }

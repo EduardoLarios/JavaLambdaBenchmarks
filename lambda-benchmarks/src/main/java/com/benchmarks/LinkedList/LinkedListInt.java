@@ -58,226 +58,205 @@ public class LinkedListInt {
 
     }
 
-    public static class Reduce {
-
-        @Benchmark
-        public int lambdaReduce() {
-            return Bench.data.stream().reduce(0, Integer::sum);
-        }
-
-        @Benchmark
-        public int loopReduce() {
-            int total = 0;
-            var iter = Bench.data.iterator();
-
-            while (iter.hasNext()) {
-                total += iter.next();
-            }
-
-            return total;
-        }
-
-        @Benchmark
-        public int iteratorReduce() {
-            int total = 0;
-            for (var value : Bench.data) {
-                total += value;
-            }
-
-            return total;
-        }
+    @Benchmark
+    public int lambdaReduce() {
+        return Bench.data.stream().reduce(0, Integer::sum);
     }
 
-    public static class Populate {
+    @Benchmark
+    public int loopReduce() {
+        int total = 0;
+        var iter = Bench.data.iterator();
 
-        @Benchmark
-        public LinkedList<Integer> lambdaPopulate() {
-            var rnd = new Random();
-            
-            return Stream.iterate(rnd.nextInt(101), i -> i + rnd.nextInt(101)).limit(Bench.data.size())
-                    .collect(Collectors.toCollection(LinkedList::new));
+        while (iter.hasNext()) {
+            total += iter.next();
         }
 
-        @Benchmark
-        public LinkedList<Integer> loopPopulate() {
-            var result = new LinkedList<Integer>();
-            var rnd = new Random();
-
-            for (int i = 0; i < Bench.data.size(); i++) {
-                result.add(i + rnd.nextInt(101));
-            }
-
-            return result;
-        }
-
-        @Benchmark
-        public LinkedList<Integer> iteratorPopulate() {
-            var result = new LinkedList<Integer>();
-            var rnd = new Random();
-
-            for (var value : Bench.data) {
-                result.add(value + rnd.nextInt(101));
-            }
-
-            return result;
-        }
+        return total;
     }
 
-    public static class Iterate {
-
-        @Benchmark
-        public int lambdaIterate() {
-            return (int) Bench.data.stream().filter(n -> n > 0).count();
+    @Benchmark
+    public int iteratorReduce() {
+        int total = 0;
+        for (var value : Bench.data) {
+            total += value;
         }
 
-        @Benchmark
-        public int loopIterate() {
-            int count = 0;
-            var iter = Bench.data.iterator();
-
-            while (iter.hasNext()) {
-                if (iter.next() > 0)
-                    count++;
-            }
-
-            return count;
-        }
-
-        @Benchmark
-        public int iteratorIterate() {
-            int count = 0;
-            for (var value : Bench.data) {
-                if (value > 0)
-                    count++;
-            }
-
-            return count;
-        }
+        return total;
     }
 
-    public static class Contains {
-
-        @Benchmark
-        public boolean lambdaContains() {
-            return Bench.contains.stream().anyMatch(n -> n == Bench.target);
-        }
-
-        @Benchmark
-        public boolean loopContains() {
-            var iter = Bench.contains.iterator();
-
-            while (iter.hasNext()) {
-                var curr = iter.next();
-                if (curr == Bench.target) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        @Benchmark
-        public boolean iteratorContains() {
-            for (var value : Bench.contains) {
-                if (value == Bench.target)
-                    return true;
-            }
-
-            return false;
-        }
+    @Benchmark
+    public LinkedList<Integer> lambdaPopulate() {
+        var rnd = new Random();
+        
+        return Stream.iterate(rnd.nextInt(101), i -> i + rnd.nextInt(101)).limit(Bench.data.size())
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    public static class Filter {
+    @Benchmark
+    public LinkedList<Integer> loopPopulate() {
+        var result = new LinkedList<Integer>();
+        var rnd = new Random();
 
-        @Benchmark
-        public LinkedList<Integer> lambdaFilter() {
-            return Bench.filter.stream().filter(n -> n >= 0).collect(Collectors.toCollection(LinkedList::new));
+        for (int i = 0; i < Bench.data.size(); i++) {
+            result.add(i + rnd.nextInt(101));
         }
 
-        @Benchmark
-        public LinkedList<Integer> loopFilter() {
-            var result = new LinkedList<Integer>();
-            var iter = Bench.filter.iterator();
-
-            while (iter.hasNext()) {
-                var curr = iter.next();
-                if (curr >= 0)
-                    result.add(curr);
-            }
-
-            return result;
-        }
-
-        @Benchmark
-        public LinkedList<Integer> iteratorFilter() {
-            var result = new LinkedList<Integer>();
-            for (var value : Bench.filter) {
-                if (value >= 0)
-                    result.add(value);
-            }
-
-            return result;
-        }
+        return result;
     }
 
-    public static class Copy {
+    @Benchmark
+    public LinkedList<Integer> iteratorPopulate() {
+        var result = new LinkedList<Integer>();
+        var rnd = new Random();
 
-        @Benchmark
-        public LinkedList<Integer> lambdaCopy() {
-            return Bench.data.stream().map(n -> n).collect(Collectors.toCollection(LinkedList::new));
+        for (var value : Bench.data) {
+            result.add(value + rnd.nextInt(101));
         }
 
-        @Benchmark
-        public LinkedList<Integer> loopCopy() {
-            var result = new LinkedList<Integer>();
-            var iter = Bench.filter.iterator();
+        return result;
+    }
 
-            while (iter.hasNext()) {
-                result.add(iter.next());
+    @Benchmark
+    public int lambdaIterate() {
+        return (int) Bench.data.stream().filter(n -> n > 0).count();
+    }
+
+    @Benchmark
+    public int loopIterate() {
+        int count = 0;
+        var iter = Bench.data.iterator();
+
+        while (iter.hasNext()) {
+            if (iter.next() > 0)
+                count++;
+        }
+
+        return count;
+    }
+
+    @Benchmark
+    public int iteratorIterate() {
+        int count = 0;
+        for (var value : Bench.data) {
+            if (value > 0)
+                count++;
+        }
+
+        return count;
+    }
+
+    @Benchmark
+    public boolean lambdaContains() {
+        return Bench.contains.stream().anyMatch(n -> n == Bench.target);
+    }
+
+    @Benchmark
+    public boolean loopContains() {
+        var iter = Bench.contains.iterator();
+
+        while (iter.hasNext()) {
+            var curr = iter.next();
+            if (curr == Bench.target) {
+                return true;
             }
-
-            return result;
         }
 
-        @Benchmark
-        public LinkedList<Integer> iteratorCopy() {
-            var result = new LinkedList<Integer>();
-            for (var value : Bench.filter) {
+        return false;
+    }
+
+    @Benchmark
+    public boolean iteratorContains() {
+        for (var value : Bench.contains) {
+            if (value == Bench.target)
+                return true;
+        }
+
+        return false;
+    }
+
+    @Benchmark
+    public LinkedList<Integer> lambdaFilter() {
+        return Bench.filter.stream().filter(n -> n >= 0).collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    @Benchmark
+    public LinkedList<Integer> loopFilter() {
+        var result = new LinkedList<Integer>();
+        var iter = Bench.filter.iterator();
+
+        while (iter.hasNext()) {
+            var curr = iter.next();
+            if (curr >= 0)
+                result.add(curr);
+        }
+
+        return result;
+    }
+
+    @Benchmark
+    public LinkedList<Integer> iteratorFilter() {
+        var result = new LinkedList<Integer>();
+        for (var value : Bench.filter) {
+            if (value >= 0)
                 result.add(value);
-            }
-
-            return result;
         }
+
+        return result;
     }
 
-    public static class Map {
+    @Benchmark
+    public LinkedList<Integer> lambdaCopy() {
+        return Bench.data.stream().map(n -> n).collect(Collectors.toCollection(LinkedList::new));
+    }
 
-        @Benchmark
-        public LinkedList<Integer> lambdaMap() {
-            return Bench.data.stream().map(n -> n * n).collect(Collectors.toCollection(LinkedList::new));
+    @Benchmark
+    public LinkedList<Integer> loopCopy() {
+        var result = new LinkedList<Integer>();
+        var iter = Bench.filter.iterator();
+
+        while (iter.hasNext()) {
+            result.add(iter.next());
         }
 
-        @Benchmark
-        public LinkedList<Integer> loopMap() {
-            var result = new LinkedList<Integer>();
-            var iter = Bench.filter.iterator();
+        return result;
+    }
 
-            while (iter.hasNext()) {
-                var curr = iter.next();
-                result.add(curr * curr);
-            }
-
-            return result;
+    @Benchmark
+    public LinkedList<Integer> iteratorCopy() {
+        var result = new LinkedList<Integer>();
+        for (var value : Bench.filter) {
+            result.add(value);
         }
 
-        @Benchmark
-        public LinkedList<Integer> iteratorMap() {
-            var result = new LinkedList<Integer>();
-            for (var value : Bench.filter) {
-                result.add(value * value);
-            }
+        return result;
+    }
 
-            return result;
+    @Benchmark
+    public LinkedList<Integer> lambdaMap() {
+        return Bench.data.stream().map(n -> n * n).collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    @Benchmark
+    public LinkedList<Integer> loopMap() {
+        var result = new LinkedList<Integer>();
+        var iter = Bench.filter.iterator();
+
+        while (iter.hasNext()) {
+            var curr = iter.next();
+            result.add(curr * curr);
         }
+
+        return result;
+    }
+
+    @Benchmark
+    public LinkedList<Integer> iteratorMap() {
+        var result = new LinkedList<Integer>();
+        for (var value : Bench.filter) {
+            result.add(value * value);
+        }
+
+        return result;
     }
 }

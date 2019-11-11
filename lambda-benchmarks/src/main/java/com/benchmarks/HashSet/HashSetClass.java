@@ -74,301 +74,280 @@ public class HashSetClass {
 
     }
 
-    public static class Reduce {
-
-        @Benchmark
-        public String lambdaReduce() {
-            return Bench.students.stream()
-                    .map(s -> String.format("%s, %s, %s", s.lastName, s.firstName,
-                            (s.average > 60) ? Integer.toString(s.average) : "Failed"))
-                    .collect(StringBuilder::new, (sb, s) -> sb.append(s), (sb1, sb2) -> sb1.append(sb2.toString()))
-                    .toString();
-        }
-
-        @Benchmark
-        public String loopReduce() {
-            var sb = new StringBuilder();
-            var iter = Bench.students.iterator();
-
-            while (iter.hasNext()) {
-                var s = iter.next();
-                var average = s.average;
-                var passed = average > 60 ? Integer.toString(average) : "Failed";
-                sb.append(String.format("%s, %s, %s", s.lastName, s.firstName, passed));
-            }
-
-            return sb.toString();
-        }
-
-        @Benchmark
-        public String iteratorReduce() {
-            var sb = new StringBuilder();
-
-            for (var s : Bench.students) {
-                var average = s.average;
-                var passed = average > 60 ? Integer.toString(average) : "Failed";
-                sb.append(String.format("%s, %s, %s", s.lastName, s.firstName, passed));
-            }
-
-            return sb.toString();
-        }
+    @Benchmark
+    public String lambdaReduce() {
+        return Bench.students.stream()
+                .map(s -> String.format("%s, %s, %s", s.lastName, s.firstName,
+                        (s.average > 60) ? Integer.toString(s.average) : "Failed"))
+                .collect(StringBuilder::new, (sb, s) -> sb.append(s), (sb1, sb2) -> sb1.append(sb2.toString()))
+                .toString();
     }
 
-    public static class Populate {
+    @Benchmark
+    public String loopReduce() {
+        var sb = new StringBuilder();
+        var iter = Bench.students.iterator();
 
-        @Benchmark
-        public HashSet<Student> lambdaPopulate() {
-            var rnd = new Random();
-            int maxF = Bench.firstNames.size();
-            int maxL = Bench.lastNames.size();
+        while (iter.hasNext()) {
+            var s = iter.next();
+            var average = s.average;
+            var passed = average > 60 ? Integer.toString(average) : "Failed";
+            sb.append(String.format("%s, %s, %s", s.lastName, s.firstName, passed));
+        }
 
-            return Bench.range.stream().map(i -> new Student() {
+        return sb.toString();
+    }
+
+    @Benchmark
+    public String iteratorReduce() {
+        var sb = new StringBuilder();
+
+        for (var s : Bench.students) {
+            var average = s.average;
+            var passed = average > 60 ? Integer.toString(average) : "Failed";
+            sb.append(String.format("%s, %s, %s", s.lastName, s.firstName, passed));
+        }
+
+        return sb.toString();
+    }
+
+    @Benchmark
+    public HashSet<Student> lambdaPopulate() {
+        var rnd = new Random();
+        int maxF = Bench.firstNames.size();
+        int maxL = Bench.lastNames.size();
+
+        return Bench.range.stream().map(i -> new Student() {
+            {
+                firstName = Bench.firstNames.get(rnd.nextInt(maxF));
+                lastName = Bench.lastNames.get(rnd.nextInt(maxL));
+                average = rnd.nextInt(100 - 50) - 50;
+                ID = i + rnd.nextLong();
+            }
+        }).collect(Collectors.toCollection(HashSet::new));
+    }
+
+    @Benchmark
+    public HashSet<Student> loopPopulate() {
+        var rnd = new Random();
+        var result = new HashSet<Student>(Bench.range.size());
+
+        int maxF = Bench.firstNames.size();
+        int maxL = Bench.lastNames.size();
+
+        for (int i = 0; i < Bench.range.size(); i++) {
+            var s = i;
+            result.add(new Student() {
                 {
                     firstName = Bench.firstNames.get(rnd.nextInt(maxF));
                     lastName = Bench.lastNames.get(rnd.nextInt(maxL));
                     average = rnd.nextInt(100 - 50) - 50;
-                    ID = i + rnd.nextLong();
+                    ID = s + rnd.nextLong();
                 }
-            }).collect(Collectors.toCollection(HashSet::new));
+            });
         }
 
-        @Benchmark
-        public HashSet<Student> loopPopulate() {
-            var rnd = new Random();
-            var result = new HashSet<Student>(Bench.range.size());
-
-            int maxF = Bench.firstNames.size();
-            int maxL = Bench.lastNames.size();
-
-            for (int i = 0; i < Bench.range.size(); i++) {
-                var s = i;
-                result.add(new Student() {
-                    {
-                        firstName = Bench.firstNames.get(rnd.nextInt(maxF));
-                        lastName = Bench.lastNames.get(rnd.nextInt(maxL));
-                        average = rnd.nextInt(100 - 50) - 50;
-                        ID = s + rnd.nextLong();
-                    }
-                });
-            }
-
-            return result;
-        }
-
-        @Benchmark
-        public HashSet<Student> iteratorPopulate() {
-            var rnd = new Random();
-            var result = new HashSet<Student>(Bench.range.size());
-
-            int maxF = Bench.firstNames.size();
-            int maxL = Bench.lastNames.size();
-
-            for (var s : Bench.range) {
-                result.add(new Student() {
-                    {
-                        firstName = Bench.firstNames.get(rnd.nextInt(maxF));
-                        lastName = Bench.lastNames.get(rnd.nextInt(maxL));
-                        average = rnd.nextInt(100 - 50) - 50;
-                        ID = s + rnd.nextLong();
-                    }
-                });
-            }
-
-            return result;
-        }
+        return result;
     }
 
-    public static class Iterate {
+    @Benchmark
+    public HashSet<Student> iteratorPopulate() {
+        var rnd = new Random();
+        var result = new HashSet<Student>(Bench.range.size());
 
-        @Benchmark
-        public int lambdaIterate() {
-            return (int) Bench.students.stream()
-                    .filter(s -> s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE).count();
-        }
+        int maxF = Bench.firstNames.size();
+        int maxL = Bench.lastNames.size();
 
-        @Benchmark
-        public int loopIterate() {
-            int count = 0;
-            var iter = Bench.students.iterator();
-
-            while (iter.hasNext()) {
-                var s = iter.next();
-                if (s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE) {
-                    count++;
+        for (var s : Bench.range) {
+            result.add(new Student() {
+                {
+                    firstName = Bench.firstNames.get(rnd.nextInt(maxF));
+                    lastName = Bench.lastNames.get(rnd.nextInt(maxL));
+                    average = rnd.nextInt(100 - 50) - 50;
+                    ID = s + rnd.nextLong();
                 }
-            }
-
-            return count;
+            });
         }
 
-        @Benchmark
-        public int iteratorIterate() {
-            int count = 0;
-            for (var s : Bench.students) {
-                if (s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE) {
-                    count++;
-                }
-            }
-
-            return count;
-        }
+        return result;
     }
 
-    public static class Contains {
-
-        @Benchmark
-        public boolean lambdaContains() {
-            return Bench.students.stream().anyMatch(
-                    s -> s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es"));
-        }
-
-        @Benchmark
-        public boolean loopContains() {
-            var iter = Bench.students.iterator();
-            while (iter.hasNext()) {
-                var s = iter.next();
-                if (s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        @Benchmark
-        public boolean iteratorContains() {
-            for (var s : Bench.students) {
-                if (s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+    @Benchmark
+    public int lambdaIterate() {
+        return (int) Bench.students.stream()
+                .filter(s -> s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE).count();
     }
 
-    public static class Filter {
+    @Benchmark
+    public int loopIterate() {
+        int count = 0;
+        var iter = Bench.students.iterator();
 
-        @Benchmark
-        public HashSet<Student> lambdaFilter() {
-            return Bench.students.stream()
-                    .filter(s -> s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target)
-                    .collect(Collectors.toCollection(HashSet::new));
-        }
-
-        @Benchmark
-        public HashSet<Student> loopFilter() {
-            var result = new HashSet<Student>(Bench.students.size());
-            var iter = Bench.students.iterator();
-
-            while (iter.hasNext()) {
-                var s = iter.next();
-                if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target) {
-                    result.add(s);
-                }
+        while (iter.hasNext()) {
+            var s = iter.next();
+            if (s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE) {
+                count++;
             }
-
-            return result;
         }
 
-        @Benchmark
-        public HashSet<Student> iteratorFilter() {
-            var result = new HashSet<Student>(Bench.students.size());
-            for (var s : Bench.students) {
-                if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target) {
-                    result.add(s);
-                }
-            }
-
-            return result;
-        }
+        return count;
     }
 
-    public static class Copy {
+    @Benchmark
+    public int iteratorIterate() {
+        int count = 0;
+        for (var s : Bench.students) {
+            if (s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE) {
+                count++;
+            }
+        }
 
-        @Benchmark
-        public HashSet<Student> lambdaCopy() {
-            return Bench.students.stream().map(s -> new Student() {
+        return count;
+    }
+
+    @Benchmark
+    public boolean lambdaContains() {
+        return Bench.students.stream().anyMatch(
+                s -> s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es"));
+    }
+
+    @Benchmark
+    public boolean loopContains() {
+        var iter = Bench.students.iterator();
+        while (iter.hasNext()) {
+            var s = iter.next();
+            if (s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Benchmark
+    public boolean iteratorContains() {
+        for (var s : Bench.students) {
+            if (s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Benchmark
+    public HashSet<Student> lambdaFilter() {
+        return Bench.students.stream()
+                .filter(s -> s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target)
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    @Benchmark
+    public HashSet<Student> loopFilter() {
+        var result = new HashSet<Student>(Bench.students.size());
+        var iter = Bench.students.iterator();
+
+        while (iter.hasNext()) {
+            var s = iter.next();
+            if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target) {
+                result.add(s);
+            }
+        }
+
+        return result;
+    }
+
+    @Benchmark
+    public HashSet<Student> iteratorFilter() {
+        var result = new HashSet<Student>(Bench.students.size());
+        for (var s : Bench.students) {
+            if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target) {
+                result.add(s);
+            }
+        }
+
+        return result;
+    }
+
+    @Benchmark
+    public HashSet<Student> lambdaCopy() {
+        return Bench.students.stream().map(s -> new Student() {
+            {
+                average = s.average;
+                ID = s.ID;
+                firstName = s.firstName;
+                lastName = s.lastName;
+            }
+        }).collect(Collectors.toCollection(HashSet::new));
+    }
+
+    @Benchmark
+    public HashSet<Student> loopCopy() {
+        var result = new HashSet<Student>(Bench.students.size());
+        var iter = Bench.students.iterator();
+
+        while (iter.hasNext()) {
+            var s = iter.next();
+            result.add(new Student() {
                 {
                     average = s.average;
                     ID = s.ID;
                     firstName = s.firstName;
                     lastName = s.lastName;
                 }
-            }).collect(Collectors.toCollection(HashSet::new));
+            });
         }
 
-        @Benchmark
-        public HashSet<Student> loopCopy() {
-            var result = new HashSet<Student>(Bench.students.size());
-            var iter = Bench.students.iterator();
-
-            while (iter.hasNext()) {
-                var s = iter.next();
-                result.add(new Student() {
-                    {
-                        average = s.average;
-                        ID = s.ID;
-                        firstName = s.firstName;
-                        lastName = s.lastName;
-                    }
-                });
-            }
-
-            return result;
-        }
-
-        @Benchmark
-        public HashSet<Student> iteratorCopy() {
-            var result = new HashSet<Student>(Bench.students.size());
-            for (var s : Bench.students) {
-                result.add(new Student() {
-                    {
-                        average = s.average;
-                        ID = s.ID;
-                        firstName = s.firstName;
-                        lastName = s.lastName;
-                    }
-                });
-            }
-
-            return result;
-        }
+        return result;
     }
 
-    public static class Map {
-
-        @Benchmark
-        public HashMap<Long, String> lambdaMap() {
-            return new HashMap<Long, String>(Bench.students.stream()
-                    .collect(Collectors.toMap(s -> s.ID, s -> String.format("%s, %s", s.lastName, s.firstName))));
-
+    @Benchmark
+    public HashSet<Student> iteratorCopy() {
+        var result = new HashSet<Student>(Bench.students.size());
+        for (var s : Bench.students) {
+            result.add(new Student() {
+                {
+                    average = s.average;
+                    ID = s.ID;
+                    firstName = s.firstName;
+                    lastName = s.lastName;
+                }
+            });
         }
 
-        @Benchmark
-        public HashMap<Long, String> loopMap() {
-            var result = new HashMap<Long, String>(Bench.students.size());
-            var iter = Bench.students.iterator();
+        return result;
+    }
 
-            while (iter.hasNext()) {
-                var s = iter.next();
-                var value = String.format("%s, %s", s.lastName, s.firstName);
+    @Benchmark
+    public HashMap<Long, String> lambdaMap() {
+        return new HashMap<Long, String>(Bench.students.stream()
+                .collect(Collectors.toMap(s -> s.ID, s -> String.format("%s, %s", s.lastName, s.firstName))));
 
-                result.put(s.ID, value);
-            }
+    }
 
-            return result;
+    @Benchmark
+    public HashMap<Long, String> loopMap() {
+        var result = new HashMap<Long, String>(Bench.students.size());
+        var iter = Bench.students.iterator();
+
+        while (iter.hasNext()) {
+            var s = iter.next();
+            var value = String.format("%s, %s", s.lastName, s.firstName);
+
+            result.put(s.ID, value);
         }
 
-        @Benchmark
-        public HashMap<Long, String> iteratorMap() {
-            var result = new HashMap<Long, String>(Bench.students.size());
-            for (var s : Bench.students) {
-                var value = String.format("%s, %s", s.lastName, s.firstName);
-                result.put(s.ID, value);
-            }
+        return result;
+    }
 
-            return result;
+    @Benchmark
+    public HashMap<Long, String> iteratorMap() {
+        var result = new HashMap<Long, String>(Bench.students.size());
+        for (var s : Bench.students) {
+            var value = String.format("%s, %s", s.lastName, s.firstName);
+            result.put(s.ID, value);
         }
+
+        return result;
     }
 }
