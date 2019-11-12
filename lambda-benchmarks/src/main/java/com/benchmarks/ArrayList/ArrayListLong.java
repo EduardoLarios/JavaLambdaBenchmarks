@@ -1,48 +1,39 @@
 package com.benchmarks.ArrayList;
 
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.*;
-
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 
 public class ArrayListLong {
 
-    @State(Scope.Benchmark)
+    @State(Scope.Thread)
     public static class Bench {
-        @Param({ "10", "100", "1000", "10000" })
-        public static int N;
-        public static long target;
-        public static ArrayList<Long> data = new ArrayList<Long>(N);
-        public static ArrayList<Long> contains = new ArrayList<Long>(N);
-        public static ArrayList<Long> filtering = new ArrayList<Long>(N);
+        @Param({"1000000"})
+        public int N;
+        public long target;
+        public ArrayList<Long> data;
+        public ArrayList<Long> contains;
+        public ArrayList<Long> filtering;
 
         @Setup(Level.Trial)
         public void setupData() {
-            for (int i = 1; i <= N; i++) {
-                data.add((long) (i * N));
-            }
-        }
-
-        @Setup(Level.Trial)
-        public void setupContains() {
             var rnd = new Random();
+            int min = -N;
+
+            data = new ArrayList<Long>(N);
+            contains = new ArrayList<Long>(N);
+            filtering = new ArrayList<Long>(N);
             target = (long) rnd.nextInt(101) * N;
 
             for (int i = 1; i <= N; i++) {
-                filtering.add((long) rnd.nextInt(101) * N);
+                data.add((long) (i * N));
+            
             }
-        }
-
-        @Setup(Level.Trial)
-        public void setupFilter() {
-            var rnd = new Random();
-            int min = -N;
+    
+            for (int i = 1; i <= N; i++) {
+                contains.add((long) rnd.nextInt(101) * N);
+            }
 
             for (int i = 1; i <= N; i++) {
                 long e = (long) rnd.nextInt(N - min) - min;
@@ -51,75 +42,75 @@ public class ArrayListLong {
         }
     }
 
-    @Benchmark
-    public long lambdaReduce() {
-        return Bench.data.stream().reduce(0L, Long::sum);
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public long lambdaReduce(Bench b) {
+        return b.data.stream().reduce(0L, Long::sum);
     }
 
-    @Benchmark
-    public long loopReduce() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public long loopReduce(Bench b) {
         long total = 0L;
 
-        for (int i = 0; i < Bench.data.size(); i++) {
-            total += Bench.data.get(i);
+        for (int i = 0; i < b.data.size(); i++) {
+            total += b.data.get(i);
         }
 
         return total;
     }
 
-    @Benchmark
-    public long iteratorReduce() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public long iteratorReduce(Bench b) {
         long total = 0L;
 
-        for (var value : Bench.data) {
+        for (var value : b.data) {
             total += value;
         }
 
         return total;
     }
 
-    @Benchmark
-    public ArrayList<Long> lambdaPopulate() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public ArrayList<Long> lambdaPopulate(Bench b) {
         var rnd = new Random();
-        return Stream.iterate(rnd.nextLong(), i -> i + rnd.nextLong()).limit(Bench.data.size())
+        return Stream.iterate(rnd.nextLong(), i -> i + rnd.nextLong()).limit(b.data.size())
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    @Benchmark
-    public ArrayList<Long> loopPopulate() {
-        var result = new ArrayList<Long>(Bench.data.size());
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public ArrayList<Long> loopPopulate(Bench b) {
+        var result = new ArrayList<Long>(b.data.size());
         var rnd = new Random();
 
-        for (int i = 0; i < Bench.data.size(); i++) {
-            result.add(Bench.data.get(i) + rnd.nextLong());
+        for (int i = 0; i < b.data.size(); i++) {
+            result.add(b.data.get(i) + rnd.nextLong());
         }
 
         return result;
     }
 
-    @Benchmark
-    public ArrayList<Long> iteratorPopulate() {
-        var result = new ArrayList<Long>(Bench.data.size());
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public ArrayList<Long> iteratorPopulate(Bench b) {
+        var result = new ArrayList<Long>(b.data.size());
         var rnd = new Random();
 
-        for (var value : Bench.data) {
+        for (var value : b.data) {
             result.add(value + rnd.nextLong());
         }
 
         return result;
     }
 
-    @Benchmark
-    public long lambdaIterate() {
-        return Bench.data.stream().filter(n -> n > 0).count();
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public long lambdaIterate(Bench b) {
+        return b.data.stream().filter(n -> n > 0).count();
     }
 
-    @Benchmark
-    public long loopIterate() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public long loopIterate(Bench b) {
         long count = 0L;
 
-        for (int i = 0; i < Bench.data.size(); i++) {
-            if (Bench.data.get(i) > 0) {
+        for (int i = 0; i < b.data.size(); i++) {
+            if (b.data.get(i) > 0) {
                 count++;
             }
         }
@@ -127,11 +118,11 @@ public class ArrayListLong {
         return count;
     }
 
-    @Benchmark
-    public long iteratorIterate() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public long iteratorIterate(Bench b) {
         long count = 0L;
 
-        for (var value : Bench.data) {
+        for (var value : b.data) {
             if (value > 0) {
                 count++;
             }
@@ -140,54 +131,54 @@ public class ArrayListLong {
         return count;
     }
 
-    @Benchmark
-    public boolean lambdaContains() {
-        return Bench.contains.stream().anyMatch(n -> n == Bench.target);
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public boolean lambdaContains(Bench b) {
+        return b.contains.stream().anyMatch(n -> n == b.target);
     }
 
-    @Benchmark
-    public boolean loopContains() {
-        for (int i = 0; i < Bench.contains.size(); i++) {
-            if (Bench.contains.get(i) == Bench.target)
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public boolean loopContains(Bench b) {
+        for (int i = 0; i < b.contains.size(); i++) {
+            if (b.contains.get(i) == b.target)
                 return true;
         }
 
         return false;
     }
 
-    @Benchmark
-    public boolean iteratorContains() {
-        for (var value : Bench.contains) {
-            if (value == Bench.target)
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public boolean iteratorContains(Bench b) {
+        for (var value : b.contains) {
+            if (value == b.target)
                 return true;
         }
 
         return false;
     }
 
-    @Benchmark
-    public ArrayList<Long> lambdaFilter() {
-        return Bench.filtering.stream().filter(n -> n >= 0).collect(Collectors.toCollection(ArrayList::new));
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public ArrayList<Long> lambdaFilter(Bench b) {
+        return b.filtering.stream().filter(n -> n >= 0).collect(Collectors.toCollection(ArrayList::new));
     }
 
-    @Benchmark
-    public ArrayList<Long> loopFilter() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public ArrayList<Long> loopFilter(Bench b) {
         var result = new ArrayList<Long>();
 
-        for (int i = 0; i < Bench.filtering.size(); i++) {
-            if (Bench.filtering.get(i) >= 0) {
-                result.add(Bench.filtering.get(i));
+        for (int i = 0; i < b.filtering.size(); i++) {
+            if (b.filtering.get(i) >= 0) {
+                result.add(b.filtering.get(i));
             }
         }
 
         return result;
     }
 
-    @Benchmark
-    public ArrayList<Long> iteratorFilter() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public ArrayList<Long> iteratorFilter(Bench b) {
         var result = new ArrayList<Long>();
 
-        for (var value : Bench.filtering) {
+        for (var value : b.filtering) {
             if (value >= 0) {
                 result.add(value);
             }
@@ -196,55 +187,55 @@ public class ArrayListLong {
         return result;
     }
 
-    @Benchmark
-    public ArrayList<Long> lambdaCopy() {
-        return Bench.data.stream().map(n -> n).collect(Collectors.toCollection(ArrayList::new));
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public ArrayList<Long> lambdaCopy(Bench b) {
+        return b.data.stream().map(n -> n).collect(Collectors.toCollection(ArrayList::new));
     }
 
-    @Benchmark
-    public ArrayList<Long> loopCopy() {
-        var copy = new ArrayList<Long>(Bench.data.size());
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public ArrayList<Long> loopCopy(Bench b) {
+        var copy = new ArrayList<Long>(b.data.size());
 
-        for (int i = 0; i < Bench.data.size(); i++) {
-            copy.add(Bench.data.get(i));
+        for (int i = 0; i < b.data.size(); i++) {
+            copy.add(b.data.get(i));
         }
 
         return copy;
     }
 
-    @Benchmark
-    public ArrayList<Long> iteratorCopy() {
-        var copy = new ArrayList<Long>(Bench.data.size());
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public ArrayList<Long> iteratorCopy(Bench b) {
+        var copy = new ArrayList<Long>(b.data.size());
 
-        for (var value : Bench.data) {
+        for (var value : b.data) {
             copy.add(value);
         }
 
         return copy;
     }
 
-    @Benchmark
-    public ArrayList<Long> lambdaMap() {
-        return Bench.data.stream().map(n -> n * Bench.N).collect(Collectors.toCollection(ArrayList::new));
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public ArrayList<Long> lambdaMap(Bench b) {
+        return b.data.stream().map(n -> n * b.N).collect(Collectors.toCollection(ArrayList::new));
     }
 
-    @Benchmark
-    public ArrayList<Long> loopMap() {
-        var result = new ArrayList<Long>(Bench.data.size());
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public ArrayList<Long> loopMap(Bench b) {
+        var result = new ArrayList<Long>(b.data.size());
 
-        for (int i = 0; i < Bench.data.size(); i++) {
-            result.add(Bench.data.get(i) * Bench.N);
+        for (int i = 0; i < b.data.size(); i++) {
+            result.add(b.data.get(i) * b.N);
         }
 
         return result;
     }
 
-    @Benchmark
-    public ArrayList<Long> iteratorMap() {
-        var result = new ArrayList<Long>(Bench.data.size());
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public ArrayList<Long> iteratorMap(Bench b) {
+        var result = new ArrayList<Long>(b.data.size());
 
-        for (var value : Bench.data) {
-            result.add(value * Bench.N);
+        for (var value : b.data) {
+            result.add(value * b.N);
         }
 
         return result;

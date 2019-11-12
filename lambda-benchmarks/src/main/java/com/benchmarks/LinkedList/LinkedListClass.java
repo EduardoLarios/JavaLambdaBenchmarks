@@ -5,26 +5,24 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.*;
 
 import com.benchmarks.Student;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 
 public class LinkedListClass {
 
-    @State(Scope.Benchmark)
+    @State(Scope.Thread)
     public static class Bench {
-        @Param({ "10", "100", "1000", "10000" })
-        public static int N;
-        public static int target;
+        @Param({"1000000"})
+        public int N;
+        public int target;
+        public LinkedList<Student> students;
+        public LinkedList<Integer> data;
 
-        public static List<String> firstNames = new ArrayList<String>(List.of(
+        public List<String> firstNames = new ArrayList<String>(List.of(
                 // Simple Male
                 "Juan", "Carlos", "Manuel", "Francisco", "Mauricio", "Eduardo",
                 // Simple Female
@@ -34,14 +32,10 @@ public class LinkedListClass {
                 // Composite Female
                 "María Fernanda", "María Jose", "Sofía Paulina", "Ana Belén", "Daniela Alejandra", "Luz Angélica"));
 
-        public static List<String> lastNames = new ArrayList<String>(List.of("García", "Rodríguez", "Hernández",
+        public List<String> lastNames = new ArrayList<String>(List.of("García", "Rodríguez", "Hernández",
                 "López", "Martínez", "González", "Pérez", "Sánchez", "Ramírez", "Torres", "Flores", "Rivera", "Gómez",
                 "Díaz", "Cruz", "Morales", "Reyes", "Gutiérrez", "Ortiz"));
 
-        public static LinkedList<Student> students;
-        public static LinkedList<Student> contains;
-        public static LinkedList<Student> filter;
-        public static LinkedList<Integer> data;
 
         @Setup(Level.Trial)
         public void setupStudents() {
@@ -64,10 +58,7 @@ public class LinkedListClass {
 
                 students.add(s);
             }
-        }
 
-        @Setup(Level.Trial)
-        public void setupData() {
             data = new LinkedList<Integer>();
             for (int i = 1; i <= N; i++) {
                 data.add(i);
@@ -75,19 +66,19 @@ public class LinkedListClass {
         }
     }
 
-    @Benchmark
-    public String lambdaReduce() {
-        return Bench.students.stream()
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public String lambdaReduce(Bench b) {
+        return b.students.stream()
                 .map(s -> String.format("%s, %s, %s", s.lastName, s.firstName,
                         (s.average > 60) ? Integer.toString(s.average) : "Failed"))
                 .collect(StringBuilder::new, (sb, s) -> sb.append(s), (sb1, sb2) -> sb1.append(sb2.toString()))
                 .toString();
     }
 
-    @Benchmark
-    public String loopReduce() {
-        var builder = new StringBuilder(Bench.students.size());
-        var iter = Bench.students.iterator();
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public String loopReduce(Bench b) {
+        var builder = new StringBuilder(b.students.size());
+        var iter = b.students.iterator();
 
         while (iter.hasNext()) {
             var s = iter.next();
@@ -99,11 +90,11 @@ public class LinkedListClass {
         return builder.toString();
     }
 
-    @Benchmark
-    public String iteratorReduce() {
-        var builder = new StringBuilder(Bench.students.size());
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public String iteratorReduce(Bench b) {
+        var builder = new StringBuilder(b.students.size());
 
-        for (var s : Bench.students) {
+        for (var s : b.students) {
             var average = s.average;
             var passed = average > 60 ? Integer.toString(average) : "Failed";
             builder.append(String.format("%s, %s, %s", s.lastName, s.firstName, passed));
@@ -112,40 +103,40 @@ public class LinkedListClass {
         return builder.toString();
     }
 
-    @Benchmark
-    public LinkedList<Student> lambdaPopulate() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public LinkedList<Student> lambdaPopulate(Bench b) {
         var rnd = new Random();
-        int maxF = Bench.firstNames.size();
-        int maxL = Bench.lastNames.size();
+        int maxF = b.firstNames.size();
+        int maxL = b.lastNames.size();
 
-        return Bench.data.stream().map(i -> new Student() {
+        return b.data.stream().map(i -> new Student() {
             {
-                firstName = Bench.firstNames.get(rnd.nextInt(maxF));
-                lastName = Bench.lastNames.get(rnd.nextInt(maxL));
+                firstName = b.firstNames.get(rnd.nextInt(maxF));
+                lastName = b.lastNames.get(rnd.nextInt(maxL));
                 average = rnd.nextInt(100 - 50) - 50;
                 ID = i + rnd.nextLong();
             }
         }).collect(Collectors.toCollection(LinkedList::new));
     }
 
-    @Benchmark
-    public LinkedList<Student> loopPopulate() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public LinkedList<Student> loopPopulate(Bench b) {
         var rnd = new Random();
         var result = new LinkedList<Student>();
 
         int max = 101;
         int min = 50;
-        int fname = Bench.firstNames.size();
-        int lname = Bench.lastNames.size();
+        int fname = b.firstNames.size();
+        int lname = b.lastNames.size();
 
-        for (int i = 0; i < Bench.data.size(); i++) {
+        for (int i = 0; i < b.data.size(); i++) {
             int n = i;
             result.add(new Student() {
                 {
                     average = rnd.nextInt(max - min) - min;
-                    ID = n * Bench.N;
-                    firstName = Bench.firstNames.get(rnd.nextInt(fname));
-                    lastName = Bench.lastNames.get(rnd.nextInt(lname));
+                    ID = n * b.N;
+                    firstName = b.firstNames.get(rnd.nextInt(fname));
+                    lastName = b.lastNames.get(rnd.nextInt(lname));
                 }
             });
         }
@@ -153,23 +144,23 @@ public class LinkedListClass {
         return result;
     }
 
-    @Benchmark
-    public LinkedList<Student> iteratorPopulate() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public LinkedList<Student> iteratorPopulate(Bench b) {
         var rnd = new Random();
         var result = new LinkedList<Student>();
 
         int max = 101;
         int min = 50;
-        int fname = Bench.firstNames.size();
-        int lname = Bench.lastNames.size();
+        int fname = b.firstNames.size();
+        int lname = b.lastNames.size();
 
-        for (var i : Bench.data) {
+        for (var i : b.data) {
             result.add(new Student() {
                 {
                     average = rnd.nextInt(max - min) - min;
-                    ID = i * Bench.N;
-                    firstName = Bench.firstNames.get(rnd.nextInt(fname));
-                    lastName = Bench.lastNames.get(rnd.nextInt(lname));
+                    ID = i * b.N;
+                    firstName = b.firstNames.get(rnd.nextInt(fname));
+                    lastName = b.lastNames.get(rnd.nextInt(lname));
                 }
             });
         }
@@ -177,16 +168,16 @@ public class LinkedListClass {
         return result;
     }
 
-    @Benchmark
-    public int lambdaIterate() {
-        return (int) Bench.students.stream()
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public int lambdaIterate(Bench b) {
+        return (int) b.students.stream()
                 .filter(s -> s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE).count();
     }
 
-    @Benchmark
-    public int loopIterate() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public int loopIterate(Bench b) {
         int count = 0;
-        var iter = Bench.students.iterator();
+        var iter = b.students.iterator();
 
         while (iter.hasNext()) {
             var s = iter.next();
@@ -198,10 +189,10 @@ public class LinkedListClass {
         return count;
     }
 
-    @Benchmark
-    public int iteratorIterate() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public int iteratorIterate(Bench b) {
         int count = 0;
-        for (var s : Bench.students) {
+        for (var s : b.students) {
             if (s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE) {
                 count++;
             }
@@ -210,16 +201,17 @@ public class LinkedListClass {
         return count;
     }
 
-    @Benchmark
-    public boolean lambdaContains() {
-        return Bench.students.stream().anyMatch(
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public boolean lambdaContains(Bench b) {
+        return b.students.stream().anyMatch(
                 s -> s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es"));
     }
 
-    @Benchmark
-    public boolean loopContains() {
-        for (int i = 0; i < Bench.students.size(); i++) {
-            var s = Bench.students.get(i);
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public boolean loopContains(Bench b) {
+        var iter = b.students.iterator();
+        while(iter.hasNext()) {
+            var s = iter.next();
             if (s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
                 return true;
             }
@@ -228,9 +220,9 @@ public class LinkedListClass {
         return false;
     }
 
-    @Benchmark
-    public boolean iteratorContains() {
-        for (var s : Bench.students) {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public boolean iteratorContains(Bench b) {
+        for (var s : b.students) {
             if (s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
                 return true;
             }
@@ -239,21 +231,21 @@ public class LinkedListClass {
         return false;
     }
 
-    @Benchmark
-    public LinkedList<Student> lambdaFilter() {
-        return Bench.students.stream()
-                .filter(s -> s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target)
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public LinkedList<Student> lambdaFilter(Bench b) {
+        return b.students.stream()
+                .filter(s -> s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > b.target)
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    @Benchmark
-    public LinkedList<Student> loopFilter() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public LinkedList<Student> loopFilter(Bench b) {
         var result = new LinkedList<Student>();
-        var iter = Bench.students.iterator();
+        var iter = b.students.iterator();
 
         while (iter.hasNext()) {
             var s = iter.next();
-            if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target) {
+            if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > b.target) {
                 result.add(s);
             }
         }
@@ -261,11 +253,11 @@ public class LinkedListClass {
         return result;
     }
 
-    @Benchmark
-    public LinkedList<Student> iteratorFilter() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public LinkedList<Student> iteratorFilter(Bench b) {
         var result = new LinkedList<Student>();
-        for (var s : Bench.students) {
-            if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > Bench.target) {
+        for (var s : b.students) {
+            if (s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > b.target) {
                 result.add(s);
             }
         }
@@ -273,9 +265,9 @@ public class LinkedListClass {
         return result;
     }
 
-    @Benchmark
-    public LinkedList<Student> lambdaCopy() {
-        return Bench.students.stream().map(s -> new Student() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public LinkedList<Student> lambdaCopy(Bench b) {
+        return b.students.stream().map(s -> new Student() {
             {
                 average = s.average;
                 ID = s.ID;
@@ -285,10 +277,10 @@ public class LinkedListClass {
         }).collect(Collectors.toCollection(LinkedList::new));
     }
 
-    @Benchmark
-    public LinkedList<Student> loopCopy() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public LinkedList<Student> loopCopy(Bench b) {
         var result = new LinkedList<Student>();
-        var iter = Bench.students.iterator();
+        var iter = b.students.iterator();
 
         while (iter.hasNext()) {
             var s = iter.next();
@@ -305,11 +297,11 @@ public class LinkedListClass {
         return result;
     }
 
-    @Benchmark
-    public LinkedList<Student> iteratorCopy() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public LinkedList<Student> iteratorCopy(Bench b) {
         var result = new LinkedList<Student>();
 
-        for (var s : Bench.students) {
+        for (var s : b.students) {
             result.add(new Student() {
                 {
                     average = s.average;
@@ -323,17 +315,17 @@ public class LinkedListClass {
         return result;
     }
 
-    @Benchmark
-    public HashMap<Long, String> lambdaMap() {
-        return new HashMap<Long, String>(Bench.students.stream()
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, String> lambdaMap(Bench b) {
+        return new HashMap<Long, String>(b.students.stream()
                 .collect(Collectors.toMap(s -> s.ID, s -> String.format("%s, %s", s.lastName, s.firstName))));
 
     }
 
-    @Benchmark
-    public HashMap<Long, String> loopMap() {
-        var result = new HashMap<Long, String>(Bench.students.size());
-        var iter = Bench.students.iterator();
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, String> loopMap(Bench b) {
+        var result = new HashMap<Long, String>(b.students.size());
+        var iter = b.students.iterator();
 
         while (iter.hasNext()) {
             var s = iter.next();
@@ -343,10 +335,10 @@ public class LinkedListClass {
         return result;
     }
 
-    @Benchmark
-    public HashMap<Long, String> iteratorMap() {
-        var result = new HashMap<Long, String>(Bench.students.size());
-        for (var s : Bench.students) {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, String> iteratorMap(Bench b) {
+        var result = new HashMap<Long, String>(b.students.size());
+        for (var s : b.students) {
             result.put(s.ID, String.format("%s, %s", s.lastName, s.firstName));
         }
 

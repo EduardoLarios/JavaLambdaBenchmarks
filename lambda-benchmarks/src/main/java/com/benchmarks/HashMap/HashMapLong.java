@@ -3,25 +3,21 @@ package com.benchmarks.HashMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 
 public class HashMapLong {
 
-    @State(Scope.Benchmark)
+    @State(Scope.Thread)
     public static class Bench {
-        @Param({ "10", "100", "1000", "10000" })
-        public static int N;
-        public static long target;
-        public static HashMap<Long, Long> data;
-        public static HashMap<Long, Long> contains;
-        public static ArrayList<Long> range;
+        @Param({"1000000"})
+        public int N;
+        public long target;
+        public HashMap<Long, Long> data;
+        public HashMap<Long, Long> contains;
+        public ArrayList<Long> range;
 
         @Setup(Level.Trial)
         public void setupData() {
@@ -29,40 +25,34 @@ public class HashMapLong {
             for (long i = 1; i <= N; i++) {
                 data.put(i * 10, i * N);
             }
-        }
 
-
-        @Setup
-        public void setupRange() {
             range = new ArrayList<Long>(N);
             for (long i = 1; i <= N; i++) {
                 range.add(i);
             }
-        }
 
-        @Setup
-        public void setupContains() {
             var rnd = new Random();
             int max = N;
             int min = -N;
-
+    
+            contains = new HashMap<Long, Long>();
             target = rnd.nextInt(max - min) - min;
-
+    
             for (long i = 1; i <= N; i++) {
                 contains.put(i, (long)rnd.nextInt(max - min) - min);
             }
         }
     }
     
-    @Benchmark
-    public long lambdaReduce() {
-        return Bench.data.values().stream().reduce(0L, Long::sum);
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public long lambdaReduce(Bench b) {
+        return b.data.values().stream().reduce(0L, Long::sum);
     }
 
-    @Benchmark
-    public long loopReduce() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public long loopReduce(Bench b) {
         long total = 0;
-        var iter = Bench.data.values().iterator();
+        var iter = b.data.values().iterator();
 
         while(iter.hasNext()) {
             total += iter.next();
@@ -71,52 +61,52 @@ public class HashMapLong {
         return total;
     }
 
-    @Benchmark
-    public long iteratorReduce() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public long iteratorReduce(Bench b) {
         long total = 0;
-        for (var value : Bench.data.values()) {
+        for (var value : b.data.values()) {
             total += value;
         }
 
         return total;
     }
 
-    @Benchmark
-    public HashMap<Long, Long> lambdaPopulate() {
-        return new HashMap<Long, Long>(Bench.range.stream().collect(Collectors.toMap(k -> k, v -> v * 5)));
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, Long> lambdaPopulate(Bench b) {
+        return new HashMap<Long, Long>(b.range.stream().collect(Collectors.toMap(k -> k, v -> v * 5)));
     }
 
-    @Benchmark
-    public HashMap<Long, Long> loopPopulate() {
-        var map = new HashMap<Long, Long>(Bench.N);
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, Long> loopPopulate(Bench b) {
+        var map = new HashMap<Long, Long>(b.N);
 
-        for (long i = 0; i < Bench.range.size(); i++) {
+        for (long i = 0; i < b.range.size(); i++) {
             map.put(i, i * 5);
         }
 
         return map;
     }
 
-    @Benchmark
-    public HashMap<Long, Long> iteratorPopulate() {
-        var map = new HashMap<Long, Long>(Bench.N);
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, Long> iteratorPopulate(Bench b) {
+        var map = new HashMap<Long, Long>(b.N);
 
-        for (var value : Bench.range) {
+        for (var value : b.range) {
             map.put(value, value * 5);
         }
 
         return map;
     }
 
-    @Benchmark
-    public long lambdaIterate() {
-        return Bench.data.values().stream().filter(n -> n < Long.MAX_VALUE).count();
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public long lambdaIterate(Bench b) {
+        return b.data.values().stream().filter(n -> n < Long.MAX_VALUE).count();
     }
 
-    @Benchmark
-    public long loopIterate() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public long loopIterate(Bench b) {
         long count = 0;
-        var iter = Bench.data.values().iterator();
+        var iter = b.data.values().iterator();
 
         while(iter.hasNext()) {
             if(iter.next() < Long.MAX_VALUE) {
@@ -127,10 +117,10 @@ public class HashMapLong {
         return count;
     }
 
-    @Benchmark
-    public long iteratorIterate() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public long iteratorIterate(Bench b) {
         long count = 0;
-        for (var value : Bench.data.values()) {
+        for (var value : b.data.values()) {
             if(value < Long.MAX_VALUE) {
                 count++;
             }
@@ -139,16 +129,16 @@ public class HashMapLong {
         return count;
     }
 
-    @Benchmark
-    public boolean lambdaContains() {
-        return Bench.contains.values().stream().anyMatch(n -> n == Bench.target);
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public boolean lambdaContains(Bench b) {
+        return b.contains.values().stream().anyMatch(n -> n == b.target);
     }
 
-    @Benchmark
-    public boolean loopContains() {
-        var iter = Bench.contains.values().iterator();
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public boolean loopContains(Bench b) {
+        var iter = b.contains.values().iterator();
         while(iter.hasNext()) {
-            if(iter.next() == Bench.target) {
+            if(iter.next() == b.target) {
                 return true;
             }
         }
@@ -156,10 +146,10 @@ public class HashMapLong {
         return false;
     }
 
-    @Benchmark
-    public boolean iteratorContains() {
-        for (var value : Bench.contains.values()) {
-            if(value == Bench.target) {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public boolean iteratorContains(Bench b) {
+        for (var value : b.contains.values()) {
+            if(value == b.target) {
                 return true;
             }
         }
@@ -167,14 +157,14 @@ public class HashMapLong {
         return false;
     }
 
-    @Benchmark
-    public HashMap<Long, Long> lambdaFilter() {
-        return new HashMap<Long, Long>(Bench.data.keySet().stream().filter(k -> k % 2 == 0).collect(Collectors.toMap(k -> k, v -> v * 10)));
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, Long> lambdaFilter(Bench b) {
+        return new HashMap<Long, Long>(b.data.keySet().stream().filter(k -> k % 2 == 0).collect(Collectors.toMap(k -> k, v -> v * 10)));
     }
 
-    @Benchmark
-    public HashMap<Long, Long> loopFilter() {
-        var iter = Bench.data.keySet().iterator();
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, Long> loopFilter(Bench b) {
+        var iter = b.data.keySet().iterator();
         var result = new HashMap<Long, Long>();
 
         while(iter.hasNext()) {
@@ -187,10 +177,10 @@ public class HashMapLong {
         return result;
     }
 
-    @Benchmark
-    public HashMap<Long, Long> iteratorFilter() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, Long> iteratorFilter(Bench b) {
         var result = new HashMap<Long, Long>();
-        for (var key : Bench.data.keySet()) {
+        for (var key : b.data.keySet()) {
             if(key % 2 == 0) {
                 result.put(key, key * 10);
             }
@@ -199,49 +189,49 @@ public class HashMapLong {
         return result;
     }
 
-    @Benchmark
-    public HashMap<Long, Long> lambdaCopy() {
-        var map = Bench.data;
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, Long> lambdaCopy(Bench b) {
+        var map = b.data;
         return new HashMap<Long, Long>(map.keySet().stream().collect(Collectors.toMap(k -> k, k -> map.get(k))));
     }
 
-    @Benchmark
-    public HashMap<Long, Long> loopCopy() {
-        var result = new HashMap<Long, Long>(Bench.data.size());
-        var iter = Bench.data.keySet().iterator();
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, Long> loopCopy(Bench b) {
+        var result = new HashMap<Long, Long>(b.data.size());
+        var iter = b.data.keySet().iterator();
 
         while(iter.hasNext()) {
             var key = iter.next();
-            result.put(key, Bench.data.get(key));
+            result.put(key, b.data.get(key));
         }
 
         return result;
     }
 
-    @Benchmark
-    public HashMap<Long, Long> iteratorCopy() {
-        var result = new HashMap<Long, Long>(Bench.data.size());
-        for (var key : Bench.data.keySet()) {
-            result.put(key, Bench.data.get(key));
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, Long> iteratorCopy(Bench b) {
+        var result = new HashMap<Long, Long>(b.data.size());
+        for (var key : b.data.keySet()) {
+            result.put(key, b.data.get(key));
         }
 
         return result;
     }
 
-    @Benchmark
-    public HashMap<Long, Long> lambdaMap() {
-        var map = Bench.data;
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, Long> lambdaMap(Bench b) {
+        var map = b.data;
         return new HashMap<Long, Long>(map.keySet().stream().collect(Collectors.toMap(k -> k * 10, k -> map.get(k) * 10)));
     }
 
-    @Benchmark
-    public HashMap<Long, Long> loopMap() {
-        var result = new HashMap<Long, Long>(Bench.data.size());
-        var iter = Bench.data.keySet().iterator();
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, Long> loopMap(Bench b) {
+        var result = new HashMap<Long, Long>(b.data.size());
+        var iter = b.data.keySet().iterator();
 
         while(iter.hasNext()) {
             var key = iter.next();
-            var value = Bench.data.get(key);
+            var value = b.data.get(key);
 
             result.put(key * 10, value * 10);
         }
@@ -249,11 +239,11 @@ public class HashMapLong {
         return result;
     }
 
-    @Benchmark
-    public HashMap<Long, Long> iteratorMap() {
-        var result = new HashMap<Long, Long>(Bench.data.size());
-        for (var key : Bench.data.keySet()) {
-            var value = Bench.data.get(key);
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashMap<Long, Long> iteratorMap(Bench b) {
+        var result = new HashMap<Long, Long>(b.data.size());
+        for (var key : b.data.keySet()) {
+            var value = b.data.get(key);
             result.put(key * 10, value * 10);
         }
 

@@ -3,26 +3,22 @@ package com.benchmarks.HashSet;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.*;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 
 public class HashSetInt {
     
-    @State(Scope.Benchmark)
+    @State(Scope.Thread)
     public static class Bench {
-        @Param({ "10", "100", "1000", "10000" })
-        public static int N;
-        public static int target;
-        public static HashSet<Integer> data;
-        public static HashSet<Integer> contains;
-        public static HashSet<Integer> filter;
-        public static ArrayList<Integer> range; 
+        @Param({"1000000"})
+        public int N;
+        public int target;
+        public HashSet<Integer> data;
+        public HashSet<Integer> contains;
+        public HashSet<Integer> filter;
+        public ArrayList<Integer> range; 
 
         @Setup(Level.Trial)
         public void setupData() {
@@ -30,53 +26,42 @@ public class HashSetInt {
             for (int i = 1; i <= N; i++) {
                 data.add(i);
             }
-        }
 
-
-        @Setup(Level.Trial)
-        public void setupRange() {
             range = new ArrayList<Integer>(N);
             for (int i = 1; i <= N; i++) {
                 range.add(i);
             }
-        }
 
-        @Setup(Level.Trial)
-        public void setupContains() {
             var max = N;
             var min = -N;
             var rnd = new Random();
             
             contains = new HashSet<Integer>(N);
             target = rnd.nextInt(max - min) - min;
-
+    
             for (int i = 1; i <= N; i++) {
                 contains.add(rnd.nextInt(max - min) - min);
             }
-        }
 
-        @Setup(Level.Trial)
-        public void setupFilter() {
-            var rnd = new Random();
-            int max = N;
-            int min = -N;
-
+            int maxf = N;
+            int minf = -N;
+    
             filter = new HashSet<Integer>(N);
             for (int i = 1; i <= N; i++) {
-                data.add(rnd.nextInt(max - min) - min);
+                data.add(rnd.nextInt(maxf - minf) - minf);
             }
         }
     }
 
-    @Benchmark
-    public int lambdaReduce() {
-        return Bench.data.stream().reduce(0, Integer::sum);
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public int lambdaReduce(Bench b) {
+        return b.data.stream().reduce(0, Integer::sum);
     }
 
-    @Benchmark
-    public int loopReduce() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public int loopReduce(Bench b) {
         int total = 0;
-        var iter = Bench.data.iterator();
+        var iter = b.data.iterator();
 
         while(iter.hasNext())
         {
@@ -86,53 +71,53 @@ public class HashSetInt {
         return total;
     }
 
-    @Benchmark
-    public int iteratorReduce() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public int iteratorReduce(Bench b) {
         int total = 0;
-        for (var value : Bench.data) {
+        for (var value : b.data) {
             total += value;
         }
 
         return total;
     }
 
-    @Benchmark
-    public HashSet<Integer> lambdaPopulate() {
-        return Bench.range.stream().map(i -> i + i).collect(Collectors.toCollection(HashSet::new));
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashSet<Integer> lambdaPopulate(Bench b) {
+        return b.range.stream().map(i -> i + i).collect(Collectors.toCollection(HashSet::new));
     }
 
-    @Benchmark
-    public HashSet<Integer> loopPopulate() {
-        var result = new HashSet<Integer>(Bench.range.size());
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashSet<Integer> loopPopulate(Bench b) {
+        var result = new HashSet<Integer>(b.range.size());
 
-        for (int i = 1; i <= Bench.range.size(); i++) {
-            var value = Bench.range.get(i);
+        for (int i = 0; i < b.range.size(); i++) {
+            var value = b.range.get(i);
             result.add(value + value);
         }
 
         return result;
     }
 
-    @Benchmark
-    public HashSet<Integer> iteratorPopulate() {
-        var result = new HashSet<Integer>(Bench.range.size());
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashSet<Integer> iteratorPopulate(Bench b) {
+        var result = new HashSet<Integer>(b.range.size());
 
-        for (var value : Bench.range) {
+        for (var value : b.range) {
             result.add(value + value);
         }
 
         return result;
     }
 
-    @Benchmark
-    public int lambdaIterate() {
-        return (int) Bench.data.stream().filter(n -> n > 0).count();
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public int lambdaIterate(Bench b) {
+        return (int) b.data.stream().filter(n -> n > 0).count();
     }
 
-    @Benchmark
-    public int loopIterate() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public int loopIterate(Bench b) {
         int count = 0;
-        var iter = Bench.data.iterator();
+        var iter = b.data.iterator();
 
         while(iter.hasNext()) {
             if (iter.next() > 0)
@@ -142,10 +127,10 @@ public class HashSetInt {
         return count;
     }
 
-    @Benchmark
-    public int iteratorIterate() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public int iteratorIterate(Bench b) {
         int count = 0;
-        for (var value : Bench.data) {
+        for (var value : b.data) {
             if (value > 0)
                 count++;
         }
@@ -153,41 +138,41 @@ public class HashSetInt {
         return count;
     }
 
-    @Benchmark
-    public boolean lambdaContains() {
-        return Bench.contains.stream().anyMatch(n -> n == Bench.target);
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public boolean lambdaContains(Bench b) {
+        return b.contains.stream().anyMatch(n -> n == b.target);
     }        
 
-    @Benchmark
-    public boolean loopContains() {
-        var iter = Bench.contains.iterator();
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public boolean loopContains(Bench b) {
+        var iter = b.contains.iterator();
 
         while(iter.hasNext()) {
             var value = iter.next();
-            if(value == Bench.target) return true;
+            if(value == b.target) return true;
         }
 
         return false;
     }
 
-    @Benchmark
-    public boolean iteratorContains() {
-        for (var value : Bench.contains) {
-            if(value == Bench.target) return true;
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public boolean iteratorContains(Bench b) {
+        for (var value : b.contains) {
+            if(value == b.target) return true;
         }
 
         return false;
     }
 
-    @Benchmark
-    public HashSet<Integer> lambdaFilter() {
-        return Bench.filter.stream().filter(n -> n >= 0).collect(Collectors.toCollection(HashSet::new));
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashSet<Integer> lambdaFilter(Bench b) {
+        return b.filter.stream().filter(n -> n >= 0).collect(Collectors.toCollection(HashSet::new));
     }
 
-    @Benchmark
-    public HashSet<Integer> loopFilter() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashSet<Integer> loopFilter(Bench b) {
         var result = new HashSet<Integer>();
-        var iter = Bench.filter.iterator();
+        var iter = b.filter.iterator();
 
         while(iter.hasNext()) {
             var value = iter.next();
@@ -197,26 +182,26 @@ public class HashSetInt {
         return result;
     }
 
-    @Benchmark
-    public HashSet<Integer> iteratorFilter() {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashSet<Integer> iteratorFilter(Bench b) {
         var result = new HashSet<Integer>();
 
-        for (var value : Bench.filter) {
+        for (var value : b.filter) {
             if(value >= 0) result.add(value);
         }
 
         return result;
     }
 
-    @Benchmark
-    public HashSet<Integer> lambdaCopy() {
-        return Bench.data.stream().map(n -> n).collect(Collectors.toCollection(HashSet::new));
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashSet<Integer> lambdaCopy(Bench b) {
+        return b.data.stream().map(n -> n).collect(Collectors.toCollection(HashSet::new));
     }
 
-    @Benchmark
-    public HashSet<Integer> loopCopy() {
-        var result = new HashSet<Integer>(Bench.data.size());
-        var iter = Bench.data.iterator();
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashSet<Integer> loopCopy(Bench b) {
+        var result = new HashSet<Integer>(b.data.size());
+        var iter = b.data.iterator();
 
         while(iter.hasNext()) {
             result.add(iter.next());
@@ -225,25 +210,25 @@ public class HashSetInt {
         return result;
     }
 
-    @Benchmark
-    public HashSet<Integer> iteratorCopy() {
-        var result = new HashSet<Integer>(Bench.data.size());
-        for (var value : Bench.data) {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashSet<Integer> iteratorCopy(Bench b) {
+        var result = new HashSet<Integer>(b.data.size());
+        for (var value : b.data) {
             result.add(value);
         }
 
         return result;
     }
 
-    @Benchmark
-    public HashSet<Integer> lambdaMap() {
-        return Bench.data.stream().map(n -> n * n).collect(Collectors.toCollection(HashSet::new));
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashSet<Integer> lambdaMap(Bench b) {
+        return b.data.stream().map(n -> n * n).collect(Collectors.toCollection(HashSet::new));
     }
 
-    @Benchmark
-    public HashSet<Integer> loopMap() {
-        var result = new HashSet<Integer>(Bench.data.size());
-        var iter = Bench.data.iterator();
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public HashSet<Integer> loopMap(Bench b) {
+        var result = new HashSet<Integer>(b.data.size());
+        var iter = b.data.iterator();
 
         while(iter.hasNext()) {
             var value = iter.next();
@@ -253,10 +238,10 @@ public class HashSetInt {
         return result;
     }
 
-    @Benchmark 
-    public HashSet<Integer> iteratorMap() {
-        var result = new HashSet<Integer>(Bench.data.size());
-        for (var value : Bench.data) {
+    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS) 
+    public HashSet<Integer> iteratorMap(Bench b) {
+        var result = new HashSet<Integer>(b.data.size());
+        for (var value : b.data) {
             result.add(value * value);
         }
 

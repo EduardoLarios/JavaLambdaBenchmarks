@@ -1,0 +1,1 @@
+java -jar benchmarks.jar -bm avgt -f 1 -t max -wi 3 -i 5 -o "filename"
