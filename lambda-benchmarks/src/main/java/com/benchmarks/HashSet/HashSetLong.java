@@ -12,7 +12,7 @@ public class HashSetLong {
 
     @State(Scope.Thread)
     public static class Bench {
-        @Param({"1000000"})
+        @Param({"1000"})
         public int N;
         public long target;
         public HashSet<Long> data;
@@ -51,12 +51,12 @@ public class HashSetLong {
         }
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public long lambdaReduce(Bench b) {
         return b.data.stream().reduce(0L, Long::sum);
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public long loopReduce(Bench b) {
         long total = 0L;
         var iter = b.data.iterator();
@@ -68,7 +68,7 @@ public class HashSetLong {
         return total;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public long iteratorReduce(Bench b) {
         long total = 0L;
 
@@ -79,12 +79,12 @@ public class HashSetLong {
         return total;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashSet<Long> lambdaPopulate(Bench b) {
         return b.range.stream().map(i -> i + i).collect(Collectors.toCollection(HashSet::new));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashSet<Long> loopPopulate(Bench b) {
         var result = new HashSet<Long>(b.range.size());
 
@@ -96,7 +96,7 @@ public class HashSetLong {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashSet<Long> iteratorPopulate(Bench b) {
         var result = new HashSet<Long>(b.range.size());
 
@@ -107,12 +107,12 @@ public class HashSetLong {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public long lambdaIterate(Bench b) {
         return b.data.stream().filter(n -> n > 0).count();
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public long loopIterate(Bench b) {
         long count = 0L;
         var iter = b.data.iterator();
@@ -125,7 +125,7 @@ public class HashSetLong {
         return count;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public long iteratorIterate(Bench b) {
         long count = 0L;
 
@@ -137,12 +137,12 @@ public class HashSetLong {
         return count;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public boolean lambdaContains(Bench b) {
         return b.contains.stream().anyMatch(n -> n == b.target);
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public boolean loopContains(Bench b) {
         var iter = b.contains.iterator();
 
@@ -156,7 +156,7 @@ public class HashSetLong {
         return false;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public boolean iteratorContains(Bench b) {
         for (var value : b.contains) {
             if (value == b.target)
@@ -166,12 +166,12 @@ public class HashSetLong {
         return false;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashSet<Long> lambdaFilter(Bench b) {
         return b.filter.stream().filter(n -> n >= 0).collect(Collectors.toCollection(HashSet::new));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashSet<Long> loopFilter(Bench b) {
         var result = new HashSet<Long>();
         var iter = b.filter.iterator();
@@ -186,7 +186,7 @@ public class HashSetLong {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashSet<Long> iteratorFilter(Bench b) {
         var result = new HashSet<Long>();
 
@@ -198,12 +198,12 @@ public class HashSetLong {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashSet<Long> lambdaCopy(Bench b) {
         return b.data.stream().map(n -> n).collect(Collectors.toCollection(HashSet::new));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashSet<Long> loopCopy(Bench b) {
         var copy = new HashSet<Long>(b.data.size());
         var iter = b.data.iterator();
@@ -215,7 +215,7 @@ public class HashSetLong {
         return copy;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashSet<Long> iteratorCopy(Bench b) {
         var copy = new HashSet<Long>(b.data.size());
 
@@ -226,12 +226,12 @@ public class HashSetLong {
         return copy;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashSet<Long> lambdaMap(Bench b) {
         return b.data.stream().map(n -> n * 10).collect(Collectors.toCollection(HashSet::new));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashSet<Long> loopMap(Bench b) {
         var result = new HashSet<Long>(b.data.size());
         var iter = b.data.iterator();
@@ -244,7 +244,7 @@ public class HashSetLong {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashSet<Long> iteratorMap(Bench b) {
         var result = new HashSet<Long>(b.data.size());
 

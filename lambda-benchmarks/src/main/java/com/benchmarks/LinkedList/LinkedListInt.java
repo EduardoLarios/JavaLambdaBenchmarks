@@ -11,7 +11,7 @@ public class LinkedListInt {
 
     @State(Scope.Thread)
     public static class Bench {
-        @Param({"1000000"})
+        @Param({"1000"})
         public int N;
         public int target;
         public LinkedList<Integer> data;
@@ -46,12 +46,12 @@ public class LinkedListInt {
         }
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int lambdaReduce(Bench b) {
         return b.data.stream().reduce(0, Integer::sum);
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int loopReduce(Bench b) {
         int total = 0;
         var iter = b.data.iterator();
@@ -63,7 +63,7 @@ public class LinkedListInt {
         return total;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int iteratorReduce(Bench b) {
         int total = 0;
         for (var value : b.data) {
@@ -73,7 +73,7 @@ public class LinkedListInt {
         return total;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public LinkedList<Integer> lambdaPopulate(Bench b) {
         var rnd = new Random();
         
@@ -81,7 +81,7 @@ public class LinkedListInt {
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public LinkedList<Integer> loopPopulate(Bench b) {
         var result = new LinkedList<Integer>();
         var rnd = new Random();
@@ -93,7 +93,7 @@ public class LinkedListInt {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public LinkedList<Integer> iteratorPopulate(Bench b) {
         var result = new LinkedList<Integer>();
         var rnd = new Random();
@@ -105,12 +105,12 @@ public class LinkedListInt {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int lambdaIterate(Bench b) {
         return (int) b.data.stream().filter(n -> n > 0).count();
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int loopIterate(Bench b) {
         int count = 0;
         var iter = b.data.iterator();
@@ -123,7 +123,7 @@ public class LinkedListInt {
         return count;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int iteratorIterate(Bench b) {
         int count = 0;
         for (var value : b.data) {
@@ -134,12 +134,12 @@ public class LinkedListInt {
         return count;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public boolean lambdaContains(Bench b) {
         return b.contains.stream().anyMatch(n -> n == b.target);
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public boolean loopContains(Bench b) {
         var iter = b.contains.iterator();
 
@@ -153,7 +153,7 @@ public class LinkedListInt {
         return false;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public boolean iteratorContains(Bench b) {
         for (var value : b.contains) {
             if (value == b.target)
@@ -163,12 +163,12 @@ public class LinkedListInt {
         return false;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public LinkedList<Integer> lambdaFilter(Bench b) {
         return b.filter.stream().filter(n -> n >= 0).collect(Collectors.toCollection(LinkedList::new));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public LinkedList<Integer> loopFilter(Bench b) {
         var result = new LinkedList<Integer>();
         var iter = b.filter.iterator();
@@ -182,7 +182,7 @@ public class LinkedListInt {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public LinkedList<Integer> iteratorFilter(Bench b) {
         var result = new LinkedList<Integer>();
         for (var value : b.filter) {
@@ -193,12 +193,12 @@ public class LinkedListInt {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public LinkedList<Integer> lambdaCopy(Bench b) {
         return b.data.stream().map(n -> n).collect(Collectors.toCollection(LinkedList::new));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public LinkedList<Integer> loopCopy(Bench b) {
         var result = new LinkedList<Integer>();
         var iter = b.filter.iterator();
@@ -210,7 +210,7 @@ public class LinkedListInt {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public LinkedList<Integer> iteratorCopy(Bench b) {
         var result = new LinkedList<Integer>();
         for (var value : b.filter) {
@@ -220,12 +220,12 @@ public class LinkedListInt {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public LinkedList<Integer> lambdaMap(Bench b) {
         return b.data.stream().map(n -> n * n).collect(Collectors.toCollection(LinkedList::new));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public LinkedList<Integer> loopMap(Bench b) {
         var result = new LinkedList<Integer>();
         var iter = b.filter.iterator();
@@ -238,7 +238,7 @@ public class LinkedListInt {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public LinkedList<Integer> iteratorMap(Bench b) {
         var result = new LinkedList<Integer>();
         for (var value : b.filter) {

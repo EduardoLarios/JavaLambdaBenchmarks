@@ -13,7 +13,7 @@ public class ArrayListClass {
     @State(Scope.Thread)
     public static class Bench {
 
-        @Param({"1000000"})
+        @Param({"1000"})
         public int N;
         public int target;
         public ArrayList<Student> students;
@@ -62,7 +62,7 @@ public class ArrayListClass {
         }
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public String lambdaReduce(Bench b) {
         return b.students.stream()
                 .map(s -> String.format("%s, %s, %s", s.lastName, s.firstName,
@@ -71,7 +71,7 @@ public class ArrayListClass {
                 .toString();
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public String loopReduce(Bench b) {
         var sb = new StringBuilder();
 
@@ -84,7 +84,7 @@ public class ArrayListClass {
         return sb.toString();
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public String iteratorReduce(Bench b) {
         var sb = new StringBuilder();
 
@@ -97,7 +97,7 @@ public class ArrayListClass {
         return sb.toString();
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public ArrayList<Student> lambdaPopulate(Bench b) {
         var rnd = new Random();
         int maxF = b.firstNames.size();
@@ -113,7 +113,7 @@ public class ArrayListClass {
         }).collect(Collectors.toCollection(ArrayList::new));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public ArrayList<Student> loopPopulate(Bench b) {
         int size = b.data.size();
         int maxF = b.firstNames.size();
@@ -137,7 +137,7 @@ public class ArrayListClass {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public ArrayList<Student> iteratorPopulate(Bench b) {
         int maxF = b.firstNames.size();
         int maxL = b.lastNames.size();
@@ -160,13 +160,13 @@ public class ArrayListClass {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int lambdaIterate(Bench b) {
         return (int) b.students.stream()
                 .filter(s -> s.firstName.length() > 0 && s.average >= 50 && s.ID < Long.MAX_VALUE).count();
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int loopIterate(Bench b) {
         int count = 0;
         int size = b.students.size();
@@ -181,7 +181,7 @@ public class ArrayListClass {
         return count;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int iteratorIterate(Bench b) {
         int count = 0;
         for (var s : b.students) {
@@ -193,13 +193,13 @@ public class ArrayListClass {
         return count;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public boolean lambdaContains(Bench b) {
         return b.students.stream().anyMatch(
                 s -> s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es"));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public boolean loopContains(Bench b) {
         int size = b.students.size();
 
@@ -213,7 +213,7 @@ public class ArrayListClass {
         return false;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public boolean iteratorContains(Bench b) {
         for (var s : b.students) {
             if (s.average >= 70 && s.average <= 85 && s.firstName.contains(" ") && s.lastName.contains("es")) {
@@ -224,14 +224,14 @@ public class ArrayListClass {
         return false;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public ArrayList<Student> lambdaFilter(Bench b) {
         return b.students.stream()
                 .filter(s -> s.average > 50 && s.average < 70 && s.firstName.contains("i") && s.ID > b.target)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public ArrayList<Student> loopFilter(Bench b) {
         int size = b.students.size();
         var result = new ArrayList<Student>(size);
@@ -246,7 +246,7 @@ public class ArrayListClass {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public ArrayList<Student> iteratorFilter(Bench b) {
         int size = b.students.size();
         var result = new ArrayList<Student>(size);
@@ -259,7 +259,7 @@ public class ArrayListClass {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public ArrayList<Student> lambdaCopy(Bench b) {
         return b.students.stream().map(s -> new Student() {
             {
@@ -271,7 +271,7 @@ public class ArrayListClass {
         }).collect(Collectors.toCollection(ArrayList::new));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public ArrayList<Student> loopCopy(Bench b) {
         int size = b.students.size();
         var result = new ArrayList<Student>(size);
@@ -292,7 +292,7 @@ public class ArrayListClass {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public ArrayList<Student> iteratorCopy(Bench b) {
         int size = b.students.size();
         var result = new ArrayList<Student>(size);
@@ -311,14 +311,14 @@ public class ArrayListClass {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Long, String> lambdaMap(Bench b) {
         return new HashMap<Long, String>(b.students.stream()
                 .collect(Collectors.toMap(s -> s.ID, s -> String.format("%s, %s", s.lastName, s.firstName))));
 
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Long, String> loopMap(Bench b) {
         int size = b.students.size();
         var result = new HashMap<Long, String>(size);
@@ -333,7 +333,7 @@ public class ArrayListClass {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Long, String> iteratorMap(Bench b) {
         int size = b.students.size();
         var result = new HashMap<Long, String>(size);

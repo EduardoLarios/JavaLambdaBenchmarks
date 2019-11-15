@@ -12,7 +12,7 @@ public class HashMapInt {
 
     @State(Scope.Thread)
     public static class Bench {
-        @Param({"1000000"})
+        @Param({"1000"})
         public int N;
         public int target;
         public HashMap<Integer, Integer> data;
@@ -46,12 +46,12 @@ public class HashMapInt {
         }
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int lambdaReduce(Bench b) {
         return b.data.values().stream().reduce(0, Integer::sum);
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int loopReduce(Bench b) {
         int total = 0;
         var iter = b.data.values().iterator();
@@ -63,7 +63,7 @@ public class HashMapInt {
         return total;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int iteratorReduce(Bench b) {
         int total = 0;
         for (var value : b.data.values()) {
@@ -73,12 +73,12 @@ public class HashMapInt {
         return total;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Integer, Integer> lambdaPopulate(Bench b) {
         return new HashMap<Integer, Integer>(b.range.stream().collect(Collectors.toMap(k -> k, v -> v * 5)));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Integer, Integer> loopPopulate(Bench b) {
         var map = new HashMap<Integer, Integer>(b.N);
 
@@ -89,7 +89,7 @@ public class HashMapInt {
         return map;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Integer, Integer> iteratorPopulate(Bench b) {
         var map = new HashMap<Integer, Integer>(b.N);
 
@@ -100,12 +100,12 @@ public class HashMapInt {
         return map;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int lambdaIterate(Bench b) {
         return (int) b.data.values().stream().filter(n -> n < Integer.MAX_VALUE).count();
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int loopIterate(Bench b) {
         int count = 0;
         var iter = b.data.values().iterator();
@@ -120,7 +120,7 @@ public class HashMapInt {
         return count;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public int iteratorIterate(Bench b) {
         int count = 0;
 
@@ -133,12 +133,12 @@ public class HashMapInt {
         return count;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public boolean lambdaContains(Bench b) {
         return b.contains.values().stream().anyMatch(n -> n == b.target);
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public boolean loopContains(Bench b) {
         var iter = b.contains.values().iterator();
 
@@ -151,7 +151,7 @@ public class HashMapInt {
         return false;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public boolean iteratorContains(Bench b) {
         for (var value : b.contains.values()) {
             if(value == b.target) {
@@ -162,12 +162,12 @@ public class HashMapInt {
         return false;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Integer, Integer> lambdaFilter(Bench b) {
         return new HashMap<Integer, Integer>(b.data.keySet().stream().filter(k -> k % 2 == 0).collect(Collectors.toMap(k -> k, v -> v * 10)));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Integer, Integer> loopFilter(Bench b) {
         var iter = b.data.keySet().iterator();
         var result = new HashMap<Integer, Integer>();
@@ -182,7 +182,7 @@ public class HashMapInt {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Integer, Integer> iteratorFilter(Bench b) {
         var result = new HashMap<Integer, Integer>();
         for (var key : b.data.keySet()) {
@@ -194,13 +194,13 @@ public class HashMapInt {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Integer, Integer> lambdaCopy(Bench b) {
         var map = b.data;
         return new HashMap<Integer, Integer>(map.keySet().stream().collect(Collectors.toMap(k -> k, k -> map.get(k))));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Integer, Integer> loopCopy(Bench b) {
         var result = new HashMap<Integer, Integer>(b.data.size());
         var iter = b.data.keySet().iterator();
@@ -213,7 +213,7 @@ public class HashMapInt {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Integer, Integer> iteratorCopy(Bench b) {
         var result = new HashMap<Integer, Integer>(b.data.size());
         for (var key : b.data.keySet()) {
@@ -223,13 +223,13 @@ public class HashMapInt {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Integer, Integer> lambdaMap(Bench b) {
         var map = b.data;
         return new HashMap<Integer, Integer>(map.keySet().stream().collect(Collectors.toMap(k -> k * 10, k -> map.get(k) * 10)));
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Integer, Integer> loopMap(Bench b) {
         var result = new HashMap<Integer, Integer>(b.data.size());
         var iter = b.data.keySet().iterator();
@@ -244,7 +244,7 @@ public class HashMapInt {
         return result;
     }
 
-    @Benchmark @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public HashMap<Integer, Integer> iteratorMap(Bench b) {
         var result = new HashMap<Integer, Integer>(b.data.size());
         for (var key : b.data.keySet()) {
