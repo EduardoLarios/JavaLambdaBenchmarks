@@ -10,7 +10,7 @@ public class ArrayListInt {
 
     @State(Scope.Thread)
     public static class Bench {
-        @Param({"1000"})
+        @Param({"100","1000","10000","100000","1000000"})
         public int N;
         public int target;
         public ArrayList<Integer> data;
